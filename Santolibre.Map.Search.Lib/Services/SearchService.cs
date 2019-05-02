@@ -202,24 +202,14 @@ namespace Santolibre.Map.Search.Lib.Services
         {
             using (var session = _documentService.OpenDocumentSession())
             {
-                /*var synonyms = new Dictionary<string, string> { { "barbecue", "bbq" }, { "ping pong", "table tennis" }, { "firepit", "fireplace" } };
-                for (var i = 0; i < poiTerms.Length; i++)
-                {
-                    if (synonyms.ContainsKey(poiTerms[i]))
-                    {
-                        poiTerms[i] = synonyms[poiTerms[i]];
-                    }
-                }*/
-
                 var query = session.Query<PointOfInterest, PointOfInterest_ByTagsAndCoordinates>();
+                query = query.Spatial(x => x.Location, y => y.WithinRadius(radius, latitude, longitude));
                 query = query.Search(x => x.TagValueSearch, poiTerms[0]);
                 for (var i = 1; i < poiTerms.Length; i++)
                 {
                     query = query.Search(x => x.TagValueSearch, poiTerms[i], options: SearchOptions.And);
                 }
-
-                var pointsOfInterest = query.ProjectInto<PointOfInterest>()
-                    .Spatial(x => x.Location, y => y.WithinRadius(radius, latitude, longitude))
+                var pointsOfInterest = query
                     .OrderByDistance(x => x.Location, latitude, longitude)
                     .Take(200)
                     .ToList();
