@@ -1,5 +1,4 @@
-﻿using Raven.Abstractions.Indexing;
-using Raven.Client.Indexes;
+﻿using Raven.Client.Documents.Indexes;
 using System.Linq;
 
 namespace Santolibre.Map.Search.Lib.Models
@@ -12,10 +11,10 @@ namespace Santolibre.Map.Search.Lib.Models
                                       select new
                                       {
                                           TagValueSearch = pointOfInterest.FilteredTags.Select(x => x.Key + " " + x.Value),
-                                          _SpatialLocation = SpatialGenerate("Location", pointOfInterest.Location.Latitude, pointOfInterest.Location.Longitude)
+                                          Location = CreateSpatialField(pointOfInterest.Location.Latitude, pointOfInterest.Location.Longitude)
                                       };
 
-            Indexes.Add(x => x.TagValueSearch, FieldIndexing.Analyzed);
+            Indexes.Add(x => x.TagValueSearch, FieldIndexing.Search);
         }
     }
 }

@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Santolibre.Map.Search.Lib.Services;
+using System;
+using System.IO;
 
 namespace Santolibre.Map.Search.WebService
 {
@@ -20,8 +22,8 @@ namespace Santolibre.Map.Search.WebService
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddScoped<ILocalizationService, LocalizationService>();
-            services.AddScoped<ISearchService, SearchService>();
+            services.AddSingleton<ILocalizationService>(provider => new LocalizationService(Path.Combine(AppDomain.CurrentDomain.GetData("DataDirectory").ToString(), "Localization")));
+            services.AddSingleton<ISearchService, SearchService>();
             services.AddSingleton<ILocationSearchService, MapQuestSearchService>();
             services.AddSingleton<IDocumentService, DocumentService>();
             services.AddSingleton(AutoMapper.CreateMapper());
@@ -44,6 +46,8 @@ namespace Santolibre.Map.Search.WebService
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            AppDomain.CurrentDomain.SetData("DataDirectory", System.IO.Path.Combine(env.ContentRootPath, "AppData"));
 
             app.UseCors(
                 options => options

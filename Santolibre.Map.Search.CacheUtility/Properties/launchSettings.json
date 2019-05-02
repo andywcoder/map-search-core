@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Santolibre.Map.Search.CacheUtility": {
+      "commandName": "Project",
+      "commandLineArgs": "--import=\"C:\\Users\\AndreasWyss\\Dropbox\\Sample Data\\OSM.PBF\\switzerland-latest.osm.pbf\""
+    }
+  }
+}

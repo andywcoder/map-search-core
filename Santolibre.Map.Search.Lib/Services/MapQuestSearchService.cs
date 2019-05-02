@@ -10,7 +10,7 @@ namespace Santolibre.Map.Search.Lib.Services
     /// <summary>
     /// https://developer.mapquest.com/documentation/open/geocoding-api/address/get/
     /// </summary>
-    public class MapQuestSearchService : IMapQuestSearchService
+    public class MapQuestSearchService : ILocationSearchService
     {
         private readonly ILocalizationService _localizationService;
         private readonly IConfiguration _configuration;
@@ -24,7 +24,7 @@ namespace Santolibre.Map.Search.Lib.Services
         public Location Search(string location)
         {
             var webClient = new WebClient();
-            var result = webClient.DownloadString($"http://open.mapquestapi.com/geocoding/v1/address?key={_configuration.GetValue<string>("MapQuestSearchApiKey")}&location=" + location);
+            var result = webClient.DownloadString($"http://open.mapquestapi.com/geocoding/v1/address?key={_configuration.GetValue<string>("AppSettings:MapQuestSearchApiKey")}&location=" + location);
             var response = JsonConvert.DeserializeObject<MapQuestSearchResponse>(result);
             var foundLocation = response.Results.First().Locations.First();
 

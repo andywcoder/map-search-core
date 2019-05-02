@@ -1,5 +1,4 @@
-﻿using Raven.Abstractions.Indexing;
-using Raven.Client.Indexes;
+﻿using Raven.Client.Documents.Indexes;
 using System.Linq;
 
 namespace Santolibre.Map.Search.Lib.Models

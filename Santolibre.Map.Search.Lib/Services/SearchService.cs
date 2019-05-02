@@ -2,7 +2,8 @@
 using OsmSharp;
 using OsmSharp.Complete;
 using OsmSharp.Streams;
-using Raven.Client;
+using Raven.Client.Documents;
+using Raven.Client.Documents.Operations;
 using Santolibre.Map.Search.Lib.Models;
 using System;
 using System.Collections.Generic;
@@ -52,7 +53,7 @@ namespace Santolibre.Map.Search.Lib.Services
                             {
                                 var pointOfInterest = new PointOfInterest();
                                 pointOfInterest.DateUpdated = DateTime.UtcNow;
-                                pointOfInterest.Id = element.Id;
+                                pointOfInterest.Id = element.Id.ToString();
                                 pointOfInterest.Tags = element.Tags.ToDictionary(x => x.Key, x => x.Value);
                                 element.Tags.RemoveAll(x => string.IsNullOrEmpty(x.Key));
                                 element.Tags.RemoveAll(x => x.Value == "no");
@@ -138,12 +139,9 @@ namespace Santolibre.Map.Search.Lib.Services
         public void RemoveOldPointsOfInterest(int days)
         {
             _logger.LogInformation($"Removing points of interest that are older than {days} days");
-            using (var session = _documentService.OpenDocumentSession())
-            {
-                var dateTime = DateTime.UtcNow - new TimeSpan(days, 0, 0, 0);
-                var operation = session.Advanced.DeleteByIndex<PointOfInterest, PointOfInterest_ByDateUpdated>(x => x.DateUpdated < dateTime);
-                operation.WaitForCompletion();
-            }
+
+            var dateTime = DateTime.UtcNow - new TimeSpan(days, 0, 0, 0);
+            _documentService.RunDeleteByQueryOperation(new DeleteByQueryOperation<PointOfInterest, PointOfInterest_ByDateUpdated>(x => x.DateUpdated < dateTime));
             _logger.LogInformation("Points of interest removed");
         }
 
@@ -204,17 +202,14 @@ namespace Santolibre.Map.Search.Lib.Services
         {
             using (var session = _documentService.OpenDocumentSession())
             {
-                var synonyms = new Dictionary<string, string> { { "barbecue", "bbq" }, { "ping pong", "table tennis" } };
+                /*var synonyms = new Dictionary<string, string> { { "barbecue", "bbq" }, { "ping pong", "table tennis" }, { "firepit", "fireplace" } };
                 for (var i = 0; i < poiTerms.Length; i++)
                 {
-                    var synonym = synonyms[poiTerms[i]];
-                    if (synonym != null)
+                    if (synonyms.ContainsKey(poiTerms[i]))
                     {
-                        poiTerms[i] = synonym;
+                        poiTerms[i] = synonyms[poiTerms[i]];
                     }
-                }
-
-                //{ "firepit", "fireplace" },
+                }*/
 
                 var query = session.Query<PointOfInterest, PointOfInterest_ByTagsAndCoordinates>();
                 query = query.Search(x => x.TagValueSearch, poiTerms[0]);
@@ -223,9 +218,11 @@ namespace Santolibre.Map.Search.Lib.Services
                     query = query.Search(x => x.TagValueSearch, poiTerms[i], options: SearchOptions.And);
                 }
 
-                var pointsOfInterest = query.ProjectFromIndexFieldsInto<PointOfInterest>()
-                    .Customize(x => x.SortByDistance())
-                    .Spatial(x => x.Location, y => y.WithinRadius(radius, latitude, longitude)).Take(200).ToList();
+                var pointsOfInterest = query.ProjectInto<PointOfInterest>()
+                    .Spatial(x => x.Location, y => y.WithinRadius(radius, latitude, longitude))
+                    .OrderByDistance(x => x.Location, latitude, longitude)
+                    .Take(200)
+                    .ToList();
                 return pointsOfInterest;
             }
         }

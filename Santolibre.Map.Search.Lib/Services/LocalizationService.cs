@@ -11,7 +11,10 @@ namespace Santolibre.Map.Search.Lib.Services
 
         public LocalizationService(string localizationFolder)
         {
-            _countryNames.Add("en", JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Path.Combine(localizationFolder, "country-names.en.json"))));
+            if (localizationFolder != null)
+            {
+                _countryNames.Add("en", JsonConvert.DeserializeObject<Dictionary<string, string>>(File.ReadAllText(Path.Combine(localizationFolder, "country-names.en.json"))));
+            }
         }
 
         public string GetCountryName(string countryCode)
