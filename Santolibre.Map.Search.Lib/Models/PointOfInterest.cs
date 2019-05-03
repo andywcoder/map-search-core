@@ -11,8 +11,7 @@ namespace Santolibre.Map.Search.Lib.Models
         public string Type { get; set; }
         public string Name { get; set; }
         public Dictionary<string, string> Tags { get; set; }
-        public Dictionary<string, string> FilteredTags { get; set; }
-        public string[] TagValueSearch { get; set; }
+        public List<string> FilteredTagKeyValues { get; set; }
         public DateTime DateUpdated { get; set; }
     }
 }

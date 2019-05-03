@@ -21,6 +21,7 @@ namespace Santolibre.Map.Search.CacheUtility
             _logger.LogDebug($"Parsing command arguments {string.Join(", ", args)}");
             var importFilename = args.Any(x => x.StartsWith("--import=")) ? args.FirstOrDefault(x => x.StartsWith("--import=")).Replace("--import=", "") : null;
             var removeOlderThan = args.Any(x => x.StartsWith("--remove-older-than=")) ? int.Parse(args.FirstOrDefault(x => x.StartsWith("--remove-older-than=")).Replace("--remove-older-than=", "")) : (int?)null;
+            var updateSuggestions = args.Any(x => x.StartsWith("--update-suggestions"));
             var compactDatabase = args.Any(x => x.StartsWith("--compact-database"));
 
             if (!string.IsNullOrEmpty(importFilename))
@@ -30,6 +31,10 @@ namespace Santolibre.Map.Search.CacheUtility
             else if (removeOlderThan.HasValue)
             {
                 _searchService.RemoveOldPointsOfInterest(removeOlderThan.Value);
+            }
+            else if (updateSuggestions)
+            {
+                _searchService.UpdateSuggestions();
             }
             else if (compactDatabase)
             {

@@ -6,6 +6,7 @@ namespace Santolibre.Map.Search.Lib.Services
     {
         void ImportPointsOfInterest(string filename);
         void RemoveOldPointsOfInterest(int days);
+        void UpdateSuggestions();
         void CompactPointsOfInterest();
         SearchResult Search(string searchTerm, double? latitude, double? longitude, double searchRadius);
     }

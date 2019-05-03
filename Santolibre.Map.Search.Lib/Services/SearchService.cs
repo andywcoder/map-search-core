@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Santolibre.Map.Search.Lib.Services
 {
@@ -49,15 +50,18 @@ namespace Santolibre.Map.Search.Lib.Services
 
                         foreach (var element in completeSource)
                         {
-                            if (tagKeys.Any(x => element.Tags.ContainsKey(x)))
+                            if (tagKeys.Any(x => element.Tags.ContainsKey(x) && !element.Tags.Any(y => y.Value == "guidepost")))
                             {
-                                var pointOfInterest = new PointOfInterest();
-                                pointOfInterest.DateUpdated = DateTime.UtcNow;
-                                pointOfInterest.Id = element.Id.ToString();
-                                pointOfInterest.Tags = element.Tags.ToDictionary(x => x.Key, x => x.Value);
-                                element.Tags.RemoveAll(x => string.IsNullOrEmpty(x.Key));
-                                element.Tags.RemoveAll(x => x.Value == "no");
-                                pointOfInterest.FilteredTags = element.Tags.ToDictionary(x => x.Key, x => x.Value);
+                                var pointOfInterest = new PointOfInterest
+                                {
+                                    DateUpdated = DateTime.UtcNow,
+                                    Id = element.Id.ToString(),
+                                    Tags = element.Tags.ToDictionary(x => x.Key, x => x.Value)
+                                };
+                                if (element.Tags.ContainsKey("name"))
+                                {
+                                    pointOfInterest.Name = element.Tags["name"];
+                                }
                                 foreach (var tagKey in tagKeys)
                                 {
                                     if (element.Tags.ContainsKey(tagKey))
@@ -67,10 +71,84 @@ namespace Santolibre.Map.Search.Lib.Services
                                         break;
                                     }
                                 }
-                                if (element.Tags.ContainsKey("name"))
-                                {
-                                    pointOfInterest.Name = element.Tags["name"];
-                                }
+
+                                element.Tags.RemoveAll(x => string.IsNullOrEmpty(x.Key));
+                                element.Tags.RemoveAll(x =>
+                                    x.Value == "no" ||
+                                    x.Value == "limited" ||
+                                    Regex.IsMatch(x.Value, @"^\d+$"));
+                                element.Tags.RemoveAll(x =>
+                                    x.Key == "website" ||
+                                    x.Key == "phone" ||
+                                    x.Key == "source" ||
+                                    x.Key == "opening_hours" ||
+                                    x.Key == "image" ||
+                                    x.Key == "ele" ||
+                                    x.Key == "ref" ||
+                                    x.Key == "uic" ||
+                                    x.Key == "payment" ||
+                                    x.Key == "currency" ||
+                                    x.Key == "layer" ||
+                                    x.Key == "collection_times" ||
+                                    x.Key == "created_by" ||
+                                    x.Key == "level" ||
+                                    x.Key == "email" ||
+                                    x.Key == "wikidata" ||
+                                    x.Key == "artist_name" ||
+                                    x.Key == "start_date" ||
+                                    x.Key == "stop_position" ||
+                                    x.Key == "fax" ||
+                                    x.Key == "height" ||
+                                    x.Key == "fee" ||
+                                    x.Key == "note" ||
+                                    x.Key == "capacity" ||
+                                    x.Key == "url" ||
+                                    x.Key == "rooms" ||
+                                    x.Key == "seats" ||
+                                    x.Key == "fixme" ||
+                                    x.Key == "colour" ||
+                                    x.Key == "color" ||
+                                    x.Key == "material" ||
+                                    x.Key.StartsWith("openGeoDB:") ||
+                                    x.Key.StartsWith("ref:") ||
+                                    x.Key.StartsWith("uic:") ||
+                                    x.Key.StartsWith("uic_") ||
+                                    x.Key.StartsWith("payment:") ||
+                                    x.Key.StartsWith("currency:") ||
+                                    x.Key.StartsWith("addr:") ||
+                                    x.Key.StartsWith("opening_hours:") ||
+                                    x.Key.StartsWith("contact:"));
+
+                                //_logger.LogTrace($"Filtered tags keys: {string.Join(", ", element.Tags.Select(x => x.Key))}");
+                                //_logger.LogTrace($"Filtered tags values: {string.Join(", ", element.Tags.Select(x => x.Value))}");
+
+                                pointOfInterest.FilteredTagKeyValues = element.Tags.Select(x => x.Key.ToLower()).Concat(element.Tags.Select(x => x.Value.ToLower())).Distinct().ToList();
+                                pointOfInterest.FilteredTagKeyValues.RemoveAll(x =>
+                                    x == "yes" ||
+                                    x == "information" ||
+                                    x == "name" ||
+                                    x == "description" ||
+                                    x == "old_name" ||
+                                    x == "official_name" ||
+                                    x == "loc_name" ||
+                                    x == "access" ||
+                                    x == "surface" ||
+                                    x == "alt_name" ||
+                                    x == "container" ||
+                                    x == "wikipedia" ||
+                                    x == "operator" ||
+                                    x == "religion" ||
+                                    x == "denomination" ||
+                                    x == "cuisine" ||
+                                    x == "operator" ||
+                                    x == "material" ||
+                                    x == "tourism" ||
+                                    x == "amenity" ||
+                                    x == "brand" ||
+                                    x.StartsWith("post_box:") ||
+                                    x.StartsWith("name:"));
+
+                                _logger.LogTrace($"Filtered tags: {string.Join(", ", pointOfInterest.FilteredTagKeyValues)}");
 
                                 var node = element as Node;
                                 if (node != null && node.Longitude.HasValue && node.Latitude.HasValue)
@@ -86,7 +164,7 @@ namespace Santolibre.Map.Search.Lib.Services
                                     }
                                 }
 
-                                if (!pointsOfInterest.Any(x => x.Id == pointOfInterest.Id))
+                                if (!pointsOfInterest.Any(x => x.Id == pointOfInterest.Id) && pointOfInterest.FilteredTagKeyValues.Any())
                                 {
                                     _logger.LogTrace("Adding point of interest " + counter + " to import batch");
                                     counter++;
@@ -102,6 +180,11 @@ namespace Santolibre.Map.Search.Lib.Services
                             if (pointsOfInterest.Count >= 5000)
                             {
                                 SavePointsOfInterest(pointsOfInterest);
+                            }
+
+                            if (totalCounter > 20000)
+                            {
+                                break;
                             }
                         }
                         SavePointsOfInterest(pointsOfInterest);
@@ -143,6 +226,20 @@ namespace Santolibre.Map.Search.Lib.Services
             var dateTime = DateTime.UtcNow - new TimeSpan(days, 0, 0, 0);
             _documentService.RunDeleteByQueryOperation(new DeleteByQueryOperation<PointOfInterest, PointOfInterest_ByDateUpdated>(x => x.DateUpdated < dateTime));
             _logger.LogInformation("Points of interest removed");
+        }
+
+        public void UpdateSuggestions()
+        {
+            using (var session = _documentService.OpenDocumentSession())
+            {
+                var suggestions = session
+                    .Query<PointOfInterest, PointOfInterest_ByTagsAndCoordinates>()
+                    .ProjectInto<PointOfInterest_ByTagsAndCoordinates.Result>()
+                    //.Search(x => x.TagValueSearch, "o")
+                    .ToList();
+                var allSuggestions = suggestions.SelectMany(x => x.TagValueSearch).ToList();
+                var distinctSuggestions = allSuggestions.Distinct().OrderBy(x => x).ToList();
+            }
         }
 
         public void CompactPointsOfInterest()
@@ -202,7 +299,7 @@ namespace Santolibre.Map.Search.Lib.Services
         {
             using (var session = _documentService.OpenDocumentSession())
             {
-                var query = session.Query<PointOfInterest, PointOfInterest_ByTagsAndCoordinates>();
+                var query = session.Query<PointOfInterest_ByTagsAndCoordinates.Result, PointOfInterest_ByTagsAndCoordinates>();
                 query = query.Spatial(x => x.Location, y => y.WithinRadius(radius, latitude, longitude));
                 query = query.Search(x => x.TagValueSearch, poiTerms[0]);
                 for (var i = 1; i < poiTerms.Length; i++)
@@ -211,6 +308,7 @@ namespace Santolibre.Map.Search.Lib.Services
                 }
                 var pointsOfInterest = query
                     .OrderByDistance(x => x.Location, latitude, longitude)
+                    .ProjectInto<PointOfInterest>()
                     .Take(200)
                     .ToList();
                 return pointsOfInterest;

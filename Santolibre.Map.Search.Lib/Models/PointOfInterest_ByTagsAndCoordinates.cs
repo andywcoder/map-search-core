@@ -5,16 +5,23 @@ namespace Santolibre.Map.Search.Lib.Models
 {
     public class PointOfInterest_ByTagsAndCoordinates : AbstractIndexCreationTask<PointOfInterest>
     {
+        public class Result
+        {
+            public string[] TagValueSearch { get; set; }
+            public GeoLocation Location { get; set; }
+        }
+
         public PointOfInterest_ByTagsAndCoordinates()
         {
             Map = pointsOfInterest => from pointOfInterest in pointsOfInterest
                                       select new
                                       {
-                                          TagValueSearch = pointOfInterest.FilteredTags.Select(x => x.Key + " " + x.Value),
+                                          TagValueSearch = pointOfInterest.FilteredTagKeyValues.ToArray(),
                                           Location = CreateSpatialField(pointOfInterest.Location.Latitude, pointOfInterest.Location.Longitude)
                                       };
 
-            Indexes.Add(x => x.TagValueSearch, FieldIndexing.Search);
+            Index("TagValueSearch", FieldIndexing.Search);
+            StoreAllFields(FieldStorage.Yes);
         }
     }
 }
