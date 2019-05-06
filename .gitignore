@@ -1,6 +1,7 @@
 .vs
 bin
 obj
+*.pubxml
 *.user
 *.log
 web.config
