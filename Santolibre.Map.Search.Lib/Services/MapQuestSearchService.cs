@@ -33,8 +33,9 @@ namespace Santolibre.Map.Search.Lib.Services
             {
                 return null;
             }
-            if (geocodeQuality.Granularity == GeocodeQualityGranularity.Country &&
-                geocodeQuality.AdministrativeAreaLevelConfidence == GeocodeQualityConfidence.Unknown)
+            if (geocodeQuality.AdministrativeAreaLevelConfidence == GeocodeQualityConfidence.Unknown &&
+                geocodeQuality.PostalCodeLevelConfidence == GeocodeQualityConfidence.Unknown &&
+                geocodeQuality.FullStreetLevelConfidence == GeocodeQualityConfidence.Unknown)
             {
                 return null;
             }
