@@ -1,4 +1,4 @@
-﻿namespace Santolibre.Map.Search.Lib.Models
+﻿namespace Santolibre.Map.Search.WebService.ApiControllers.v1.Models
 {
     public class Suggestion
     {

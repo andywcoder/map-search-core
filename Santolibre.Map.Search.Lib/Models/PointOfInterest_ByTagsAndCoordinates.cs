@@ -21,7 +21,6 @@ namespace Santolibre.Map.Search.Lib.Models
                                       };
 
             Index("TagValueSearch", FieldIndexing.Search);
-            StoreAllFields(FieldStorage.Yes);
         }
     }
 }

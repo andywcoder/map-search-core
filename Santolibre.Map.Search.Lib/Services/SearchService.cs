@@ -110,6 +110,7 @@ namespace Santolibre.Map.Search.Lib.Services
                                     x.Key == "color" ||
                                     x.Key == "material" ||
                                     x.Key.StartsWith("openGeoDB:") ||
+                                    x.Key.StartsWith("note:") ||
                                     x.Key.StartsWith("ref:") ||
                                     x.Key.StartsWith("uic:") ||
                                     x.Key.StartsWith("uic_") ||
@@ -312,6 +313,21 @@ namespace Santolibre.Map.Search.Lib.Services
                     .Take(200)
                     .ToList();
                 return pointsOfInterest;
+            }
+        }
+
+        public List<Suggestion> GetSuggestions(string searchTerm, double? latitude, double? longitude, double radius)
+        {
+            using (var session = _documentService.OpenDocumentSession())
+            {
+                var query = session.Query<PointOfInterest_ByTagsAndCoordinates.Result, PointOfInterest_ByTagsAndCoordinates>();
+                query = query.Spatial(x => x.Location, y => y.WithinRadius(radius, latitude.Value, longitude.Value));
+                query = query.Search(x => x.TagValueSearch, searchTerm + "*");
+                var pointsOfInterest = query
+                    .ProjectInto<PointOfInterest>()
+                    .Take(200)
+                    .ToList();
+                return pointsOfInterest.OrderBy(x => x.Name).Select(x => new Suggestion() { Value = x.Type + " " + x.Name }).ToList();
             }
         }
     }

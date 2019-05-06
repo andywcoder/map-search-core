@@ -1,7 +1,7 @@
 ﻿using Santolibre.Map.Search.Lib.Models;
 using System.Collections.Generic;
 
-namespace Santolibre.Map.Search.WebService.Controllers.v1.Models
+namespace Santolibre.Map.Search.WebService.ApiControllers.v1.Models
 {
     public class SearchResult
     {

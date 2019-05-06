@@ -11,8 +11,9 @@ namespace Santolibre.Map.Search.WebService
             var config = new MapperConfiguration(x =>
             {
                 x.AllowNullCollections = true;
-                x.CreateMap<Lib.Models.SearchResult, Controllers.v1.Models.SearchResult>();
-                x.CreateMap<Lib.Models.PointOfInterest, Controllers.v1.Models.PointOfInterest>();
+                x.CreateMap<Lib.Models.SearchResult, ApiControllers.v1.Models.SearchResult>();
+                x.CreateMap<Lib.Models.PointOfInterest, ApiControllers.v1.Models.PointOfInterest>();
+                x.CreateMap<Lib.Models.Suggestion, ApiControllers.v1.Models.Suggestion>();
             });
 
             config.AssertConfigurationIsValid();
