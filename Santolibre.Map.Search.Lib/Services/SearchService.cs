@@ -35,7 +35,7 @@ namespace Santolibre.Map.Search.Lib.Services
                 var location = _locationSearchService.Search(locationTerm);
                 if (location != null)
                 {
-                    var pointsOfInterest = GetPointsOfInterest(poiTerm.Split(' '), location.GeoLocation.Latitude, location.GeoLocation.Longitude, location.Radius, 200);
+                    var pointsOfInterest = GetPointsOfInterest(poiTerm.ToLower().Split(' ').Distinct().ToArray(), location.GeoLocation.Latitude, location.GeoLocation.Longitude, location.Radius, 200);
                     if (pointsOfInterest.Any())
                     {
                         searchResult.PointsOfInterest = pointsOfInterest;
@@ -67,14 +67,14 @@ namespace Santolibre.Map.Search.Lib.Services
                 }
                 else if (latitude.HasValue && longitude.HasValue)
                 {
-                    var pointsOfInterest = GetPointsOfInterest(unspecificTerm.Split(' '), latitude.Value, longitude.Value, null, 200);
+                    var pointsOfInterest = GetPointsOfInterest(unspecificTerm.ToLower().Split(' ').Distinct().ToArray(), latitude.Value, longitude.Value, null, 200);
                     if (pointsOfInterest.Any())
                     {
                         searchResult.PointsOfInterest = pointsOfInterest;
                         if (pointsOfInterest.Count == 1)
                         {
                             searchResult.Location = pointsOfInterest[0].Location;
-                            searchResult.Radius = 5;
+                            searchResult.Radius = 1;
 
                         }
                         else
@@ -104,7 +104,7 @@ namespace Santolibre.Map.Search.Lib.Services
                 var location = _locationSearchService.Search(locationTerm);
                 if (location != null)
                 {
-                    var poiSuggestions = GetPointOfInterestSuggestions(poiTerm.Split(' ').Select(x => x + "*").ToArray(), location.GeoLocation.Latitude, location.GeoLocation.Longitude, location.Radius, 5);
+                    var poiSuggestions = GetPointOfInterestSuggestions(poiTerm.ToLower().Split(' ').Distinct().Select(x => x + "*").ToArray(), location.GeoLocation.Latitude, location.GeoLocation.Longitude, location.Radius, 5);
                     if (poiSuggestions.Any())
                     {
                         poiSuggestions.ForEach(x => { x.Value = $"{x.Value} {combinerTerm} {location.Name}"; });
@@ -127,7 +127,7 @@ namespace Santolibre.Map.Search.Lib.Services
                 }
                 else if (latitude.HasValue && longitude.HasValue)
                 {
-                    suggestions.AddRange(GetPointOfInterestSuggestions(unspecificTerm.Split(' ').Select(x => x + "*").ToArray(), latitude.Value, longitude.Value, null, 5));
+                    suggestions.AddRange(GetPointOfInterestSuggestions(unspecificTerm.ToLower().Split(' ').Distinct().Select(x => x + "*").ToArray(), latitude.Value, longitude.Value, null, 5));
                 }
             }
 
@@ -138,17 +138,14 @@ namespace Santolibre.Map.Search.Lib.Services
         {
             using (var session = _documentService.OpenDocumentSession())
             {
-                var query = session.Query<PointOfInterest_ByTagsEnglishAndCoordinates.Result, PointOfInterest_ByTagsEnglishAndCoordinates>();
+                var query = session.Query<PointOfInterest_ByTagsEnglishNameAndCoordinates.Result, PointOfInterest_ByTagsEnglishNameAndCoordinates>();
 
                 if (radius.HasValue)
                 {
                     query = query.Spatial(x => x.Location, y => y.WithinRadius(radius.Value, latitude, longitude));
                 }
 
-                query = query.Search(x => x.Name, poiTerms[0]);
-                poiTerms.Skip(1).ToList().ForEach(x => { query = query.Search(y => y.Name, x, options: SearchOptions.And); });
-
-                query = query.Search(x => x.TagKeyValueSearch, poiTerms[0], options: SearchOptions.And);
+                query = query.Search(x => x.TagKeyValueSearch, poiTerms[0]);
                 poiTerms.Skip(1).ToList().ForEach(x => { query = query.Search(y => y.TagKeyValueSearch, x, options: SearchOptions.And); });
 
                 var pointsOfInterest = query
@@ -170,9 +167,9 @@ namespace Santolibre.Map.Search.Lib.Services
                 var valueComponents = pointOfInterest.Type.Split('_').ToList();
                 if (!string.IsNullOrEmpty(pointOfInterest.Name))
                 {
-                    valueComponents.AddRange(pointOfInterest.Name.Split(' ', StringSplitOptions.RemoveEmptyEntries));
+                    valueComponents.AddRange(pointOfInterest.Name.ToLower().Split(' ', StringSplitOptions.RemoveEmptyEntries));
                 }
-                suggestions.Add(new Suggestion() { Value = string.Join(" ", valueComponents.Select(x => x.First().ToString().ToUpper() + x.Substring(1))) });
+                suggestions.Add(new Suggestion() { Value = string.Join(" ", valueComponents.Distinct().Select(x => x.First().ToString().ToUpper() + x.Substring(1))) });
             }
             return suggestions.Distinct().ToList();
         }

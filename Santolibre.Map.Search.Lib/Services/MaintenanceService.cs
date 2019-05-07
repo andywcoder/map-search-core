@@ -205,7 +205,7 @@ namespace Santolibre.Map.Search.Lib.Services
             {
                 using (var session = _documentService.OpenDocumentSession())
                 {
-                    var query = session.Query<PointOfInterest_ByTagsEnglishAndCoordinates.Result, PointOfInterest_ByTagsEnglishAndCoordinates>();
+                    var query = session.Query<PointOfInterest_ByTagsEnglishNameAndCoordinates.Result, PointOfInterest_ByTagsEnglishNameAndCoordinates>();
                     var documentCount = query.Where(x => x.TagKeyValueSearch.Contains(term)).Count();
                     termDocumentCounts.Add(term, documentCount);
                 }
