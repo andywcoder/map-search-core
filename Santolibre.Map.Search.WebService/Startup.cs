@@ -23,7 +23,8 @@ namespace Santolibre.Map.Search.WebService
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<ILocalizationService>(provider => new LocalizationService(Path.Combine(AppDomain.CurrentDomain.GetData("DataDirectory").ToString(), "Localization")));
-            services.AddSingleton<IPointOfInterestService, PointOfInterestService>();
+            services.AddSingleton<IMaintenanceService, MaintenanceService>();
+            services.AddSingleton<ISearchService, SearchService>();
             services.AddSingleton<ILocationSearchService, MapQuestSearchService>();
             services.AddSingleton<IDocumentService, DocumentService>();
             services.AddSingleton(AutoMapper.CreateMapper());

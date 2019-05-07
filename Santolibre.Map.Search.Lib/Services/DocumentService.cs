@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Raven.Client.Documents;
-using Raven.Client.Documents.Indexes;
 using Raven.Client.Documents.Operations;
 using Raven.Client.Documents.Operations.Indexes;
 using Raven.Client.Documents.Session;
@@ -12,8 +11,7 @@ namespace Santolibre.Map.Search.Lib.Services
 {
     public class DocumentService : IDocumentService
     {
-        public IConfiguration _configuration { get; }
-
+        private readonly IConfiguration _configuration;
         private readonly IDocumentStore _documentStore;
 
         public DocumentService(IConfiguration configuration)
@@ -21,7 +19,8 @@ namespace Santolibre.Map.Search.Lib.Services
             _configuration = configuration;
             _documentStore = new DocumentStore { Urls = new string[] { configuration.GetValue<string>("AppSettings:RavenDbUrl") }, Database = configuration.GetValue<string>("AppSettings:RavenDbDefaultDatabase") };
             _documentStore.Initialize();
-            new PointOfInterest_ByTagsAndCoordinates().Execute(_documentStore);
+            new PointOfInterest_ByTagsEnglishAndCoordinates().Execute(_documentStore);
+            new PointOfInterest_ByTagsGermanAndCoordinates().Execute(_documentStore);
             new PointOfInterest_ByDateUpdated().Execute(_documentStore);
         }
 
@@ -30,10 +29,16 @@ namespace Santolibre.Map.Search.Lib.Services
             return _documentStore.OpenSession();
         }
 
-        public void RunDeleteByQueryOperation<TEntity, TIndexCreator>(DeleteByQueryOperation<TEntity, TIndexCreator> deleteByQueryOperation) where TIndexCreator : AbstractIndexCreationTask, new()
+        public void RunDeleteByQueryOperation(DeleteByQueryOperation deleteByQueryOperation)
         {
             var operation = _documentStore.Operations.Send(deleteByQueryOperation);
             operation.WaitForCompletion();
+        }
+
+        public T RunOperation<T>(IMaintenanceOperation<T> maintenanceOperation)
+        {
+            var result = _documentStore.Maintenance.Send(maintenanceOperation);
+            return result;
         }
 
         public void CompactDocumentStore()

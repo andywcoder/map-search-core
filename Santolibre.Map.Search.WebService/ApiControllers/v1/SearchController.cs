@@ -8,12 +8,12 @@ namespace Santolibre.Map.Search.WebService.ApiControllers.v1
     [Route("api/v1")]
     public class SearchController : ControllerBase
     {
-        private readonly IPointOfInterestService _pointOfInterestService;
+        private readonly ISearchService _searchService;
         private readonly IMapper _mapper;
 
-        public SearchController(IPointOfInterestService pointOfInterestService, IMapper mapper)
+        public SearchController(ISearchService searchService, IMapper mapper)
         {
-            _pointOfInterestService = pointOfInterestService;
+            _searchService = searchService;
             _mapper = mapper;
         }
 
@@ -21,7 +21,7 @@ namespace Santolibre.Map.Search.WebService.ApiControllers.v1
         [HttpGet]
         public IActionResult Search(string searchTerm, double? latitude = null, double? longitude = null)
         {
-            var searchResult = _pointOfInterestService.GetSearchResult(searchTerm, latitude, longitude);
+            var searchResult = _searchService.GetSearchResult(searchTerm, latitude, longitude);
             return Ok(_mapper.Map<SearchResult>(searchResult));
         }
     }

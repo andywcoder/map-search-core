@@ -3,11 +3,8 @@ using System.Collections.Generic;
 
 namespace Santolibre.Map.Search.Lib.Services
 {
-    public interface IPointOfInterestService
+    public interface ISearchService
     {
-        void ImportPointsOfInterest(string filename);
-        void RemoveOldPointsOfInterest(int days);
-        void CompactPointsOfInterest();
         SearchResult GetSearchResult(string searchTerm, double? latitude, double? longitude);
         List<Suggestion> GetSuggestions(string searchTerm, double? latitude, double? longitude);
     }

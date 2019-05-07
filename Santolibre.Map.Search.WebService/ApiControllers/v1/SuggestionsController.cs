@@ -9,12 +9,12 @@ namespace Santolibre.Map.Search.WebService.ApiControllers.v1
     [Route("api/v1")]
     public class SuggestionsController : ControllerBase
     {
-        private readonly IPointOfInterestService _pointOfInterestService;
+        private readonly ISearchService _searchService;
         private readonly IMapper _mapper;
 
-        public SuggestionsController(IPointOfInterestService pointOfInterestService, IMapper mapper)
+        public SuggestionsController(ISearchService searchService, IMapper mapper)
         {
-            _pointOfInterestService = pointOfInterestService;
+            _searchService = searchService;
             _mapper = mapper;
         }
 
@@ -22,7 +22,7 @@ namespace Santolibre.Map.Search.WebService.ApiControllers.v1
         [HttpGet]
         public IActionResult Suggestions(string searchTerm, double latitude, double longitude)
         {
-            var suggestions = _pointOfInterestService.GetSuggestions(searchTerm, latitude, longitude);
+            var suggestions = _searchService.GetSuggestions(searchTerm, latitude, longitude);
             return Ok(_mapper.Map<List<Suggestion>>(suggestions));
         }
     }
