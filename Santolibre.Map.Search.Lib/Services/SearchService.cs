@@ -136,7 +136,7 @@ namespace Santolibre.Map.Search.Lib.Services
             var suggestions = new List<Suggestion>();
             foreach (var pointOfInterest in pointsOfInterest)
             {
-                var valueComponents = pointOfInterest.Type.Split('_').ToList();
+                var valueComponents = pointOfInterest.Type.Split(new char[] { '_', ';' }).ToList();
                 if (!string.IsNullOrEmpty(pointOfInterest.Name))
                 {
                     valueComponents.AddRange(pointOfInterest.Name.ToLower().Split(' ', StringSplitOptions.RemoveEmptyEntries));

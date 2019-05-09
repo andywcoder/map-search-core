@@ -40,9 +40,7 @@ namespace Santolibre.Map.Search.Lib.Repositories
                 return pointsOfInterest;
             }
         }
-
-
-
+               
         public void SavePointsOfInterest(List<PointOfInterest> pointsOfInterest)
         {
             using (var session = _documentService.OpenDocumentSession())
