@@ -9,7 +9,6 @@ namespace Santolibre.Map.Search.WebService.ApiControllers.v1.Models
         public GeoLocation Location { get; set; }
         public GeocodeQuality GeocodeQuality { get; set; }
         public double Radius { get; set; }
-        public int? ZoomLevel { get; set; }
         public List<PointOfInterest> PointsOfInterest { get; set; }
     }
 }

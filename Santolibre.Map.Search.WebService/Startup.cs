@@ -5,6 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using Santolibre.Map.Search.Lib.Repositories;
 using Santolibre.Map.Search.Lib.Services;
 using System;
 using System.IO;
@@ -27,6 +28,7 @@ namespace Santolibre.Map.Search.WebService
             services.AddSingleton<ISearchService, SearchService>();
             services.AddSingleton<ILocationSearchService, MapQuestSearchService>();
             services.AddSingleton<IDocumentService, DocumentService>();
+            services.AddSingleton<IPointOfInterestRepository, PointOfInterestRepository>();
             services.AddSingleton(AutoMapper.CreateMapper());
 
             services.AddCors();

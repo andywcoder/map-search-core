@@ -12,4 +12,14 @@
     <PackageReference Include="RavenDB.Client" Version="4.1.5" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Santolibre.RavenDB.Analyzers\Santolibre.RavenDB.Analyzers.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Lucene.Net">
+      <HintPath>..\_Libs\Lucene.Net.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

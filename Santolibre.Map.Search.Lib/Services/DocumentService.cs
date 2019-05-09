@@ -20,7 +20,8 @@ namespace Santolibre.Map.Search.Lib.Services
             _documentStore = new DocumentStore { Urls = new string[] { configuration.GetValue<string>("AppSettings:RavenDbUrl") }, Database = configuration.GetValue<string>("AppSettings:RavenDbDefaultDatabase") };
             _documentStore.Initialize();
             new PointOfInterest_ByTagsEnglishNameAndCoordinates().Execute(_documentStore);
-            new PointOfInterest_ByTagsGermanNameAndCoordinates().Execute(_documentStore);
+            //new PointOfInterest_ByTagsGermanNameAndCoordinates().Execute(_documentStore);
+            new PointOfInterest_ByTagsEnglish().Execute(_documentStore);
             new PointOfInterest_ByDateUpdated().Execute(_documentStore);
         }
 

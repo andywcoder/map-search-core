@@ -1,6 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
-using Raven.Client.Documents;
-using Santolibre.Map.Search.Lib.Models;
+﻿using Santolibre.Map.Search.Lib.Models;
+using Santolibre.Map.Search.Lib.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,15 +9,13 @@ namespace Santolibre.Map.Search.Lib.Services
 {
     public class SearchService : ISearchService
     {
-        private readonly IDocumentService _documentService;
         private readonly ILocationSearchService _locationSearchService;
-        private readonly ILogger<ISearchService> _logger;
+        private readonly IPointOfInterestRepository _pointOfInterestRepository;
 
-        public SearchService(IDocumentService documentService, ILocationSearchService locationSearchService, ILogger<ISearchService> logger)
+        public SearchService(ILocationSearchService locationSearchService, IPointOfInterestRepository pointOfInterestRepository)
         {
-            _documentService = documentService;
             _locationSearchService = locationSearchService;
-            _logger = logger;
+            _pointOfInterestRepository = pointOfInterestRepository;
         }
 
         public SearchResult GetSearchResult(string searchTerm, double? latitude, double? longitude)
@@ -35,7 +32,7 @@ namespace Santolibre.Map.Search.Lib.Services
                 var location = _locationSearchService.Search(locationTerm);
                 if (location != null)
                 {
-                    var pointsOfInterest = GetPointsOfInterest(poiTerm.ToLower().Split(' ').Distinct().ToArray(), location.GeoLocation.Latitude, location.GeoLocation.Longitude, location.Radius, 200);
+                    var pointsOfInterest = _pointOfInterestRepository.GetPointsOfInterest(poiTerm, false, location.GeoLocation.Latitude, location.GeoLocation.Longitude, location.Radius, 200);
                     if (pointsOfInterest.Any())
                     {
                         searchResult.PointsOfInterest = pointsOfInterest;
@@ -47,7 +44,6 @@ namespace Santolibre.Map.Search.Lib.Services
                         searchResult.Name = location.Name;
                         searchResult.Location = location.GeoLocation;
                         searchResult.Radius = location.Radius;
-                        searchResult.ZoomLevel = location.ZoomLevel;
                         searchResult.GeocodeQuality = location.GeocodeQuality;
                     }
                 }
@@ -62,12 +58,11 @@ namespace Santolibre.Map.Search.Lib.Services
                     searchResult.Name = location.Name;
                     searchResult.Location = location.GeoLocation;
                     searchResult.Radius = location.Radius;
-                    searchResult.ZoomLevel = location.ZoomLevel;
                     searchResult.GeocodeQuality = location.GeocodeQuality;
                 }
                 else if (latitude.HasValue && longitude.HasValue)
                 {
-                    var pointsOfInterest = GetPointsOfInterest(unspecificTerm.ToLower().Split(' ').Distinct().ToArray(), latitude.Value, longitude.Value, null, 200);
+                    var pointsOfInterest = _pointOfInterestRepository.GetPointsOfInterest(unspecificTerm, false, latitude.Value, longitude.Value, null, 200);
                     if (pointsOfInterest.Any())
                     {
                         searchResult.PointsOfInterest = pointsOfInterest;
@@ -104,7 +99,7 @@ namespace Santolibre.Map.Search.Lib.Services
                 var location = _locationSearchService.Search(locationTerm);
                 if (location != null)
                 {
-                    var poiSuggestions = GetPointOfInterestSuggestions(poiTerm.ToLower().Split(' ').Distinct().Select(x => x + "*").ToArray(), location.GeoLocation.Latitude, location.GeoLocation.Longitude, location.Radius, 5);
+                    var poiSuggestions = GetPointOfInterestSuggestions(poiTerm, location.GeoLocation.Latitude, location.GeoLocation.Longitude, location.Radius, 5);
                     if (poiSuggestions.Any())
                     {
                         poiSuggestions.ForEach(x => { x.Value = $"{x.Value} {combinerTerm} {location.Name}"; });
@@ -127,39 +122,16 @@ namespace Santolibre.Map.Search.Lib.Services
                 }
                 else if (latitude.HasValue && longitude.HasValue)
                 {
-                    suggestions.AddRange(GetPointOfInterestSuggestions(unspecificTerm.ToLower().Split(' ').Distinct().Select(x => x + "*").ToArray(), latitude.Value, longitude.Value, null, 5));
+                    suggestions.AddRange(GetPointOfInterestSuggestions(unspecificTerm, latitude.Value, longitude.Value, null, 5));
                 }
             }
 
             return suggestions;
         }
 
-        private List<PointOfInterest> GetPointsOfInterest(string[] poiTerms, double latitude, double longitude, double? radius, int take)
+        private List<Suggestion> GetPointOfInterestSuggestions(string searchTerm, double latitude, double longitude, double? radius, int take)
         {
-            using (var session = _documentService.OpenDocumentSession())
-            {
-                var query = session.Query<PointOfInterest_ByTagsEnglishNameAndCoordinates.Result, PointOfInterest_ByTagsEnglishNameAndCoordinates>();
-
-                if (radius.HasValue)
-                {
-                    query = query.Spatial(x => x.Location, y => y.WithinRadius(radius.Value, latitude, longitude));
-                }
-
-                query = query.Search(x => x.TagKeyValueSearch, poiTerms[0]);
-                poiTerms.Skip(1).ToList().ForEach(x => { query = query.Search(y => y.TagKeyValueSearch, x, options: SearchOptions.And); });
-
-                var pointsOfInterest = query
-                    .OrderByDistance(x => x.Location, latitude, longitude)
-                    .ProjectInto<PointOfInterest>()
-                    .Take(take)
-                    .ToList();
-                return pointsOfInterest;
-            }
-        }
-
-        private List<Suggestion> GetPointOfInterestSuggestions(string[] poiTerms, double latitude, double longitude, double? radius, int take)
-        {
-            var pointsOfInterest = GetPointsOfInterest(poiTerms, latitude, longitude, radius, take);
+            var pointsOfInterest = _pointOfInterestRepository.GetPointsOfInterest(searchTerm, true, latitude, longitude, radius, take);
 
             var suggestions = new List<Suggestion>();
             foreach (var pointOfInterest in pointsOfInterest)

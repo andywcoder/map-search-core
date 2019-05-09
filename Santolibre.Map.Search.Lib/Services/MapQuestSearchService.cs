@@ -53,7 +53,6 @@ namespace Santolibre.Map.Search.Lib.Services
                 Name = string.Join(", ", name),
                 ZipCode = foundLocation.PostalCode,
                 GeoLocation = foundLocation.Location,
-                ZoomLevel = foundLocation.GetZoomLevel(),
                 Radius = foundLocation.GetRadius(),
                 GeocodeQuality = geocodeQuality
             };

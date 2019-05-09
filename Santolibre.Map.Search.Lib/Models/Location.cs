@@ -6,7 +6,6 @@
         public string Name { get; set; }
         public string ZipCode { get; set; }
         public double Radius { get; set; }
-        public int ZoomLevel { get; set; }
         public GeocodeQuality GeocodeQuality { get; set; }
     }
 }

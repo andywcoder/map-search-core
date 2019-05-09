@@ -6,6 +6,7 @@ using Raven.Client.Documents;
 using Raven.Client.Documents.Operations;
 using Raven.Client.Documents.Operations.Indexes;
 using Santolibre.Map.Search.Lib.Models;
+using Santolibre.Map.Search.Lib.Repositories;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,11 +18,13 @@ namespace Santolibre.Map.Search.Lib.Services
     public class MaintenanceService : IMaintenanceService
     {
         private readonly IDocumentService _documentService;
+        private readonly IPointOfInterestRepository _pointOfInterestRepository;
         private readonly ILogger<IMaintenanceService> _logger;
 
-        public MaintenanceService(IDocumentService documentService, ILogger<IMaintenanceService> logger)
+        public MaintenanceService(IDocumentService documentService, IPointOfInterestRepository pointOfInterestRepository, ILogger<IMaintenanceService> logger)
         {
             _documentService = documentService;
+            _pointOfInterestRepository = pointOfInterestRepository;
             _logger = logger;
         }
 
@@ -81,11 +84,6 @@ namespace Santolibre.Map.Search.Lib.Services
                             {
                                 SavePointsOfInterest(pointsOfInterest);
                             }
-
-                            /*if (totalCounter > 20000)
-                            {
-                                break;
-                            }*/
                         }
                         SavePointsOfInterest(pointsOfInterest);
 
@@ -131,7 +129,7 @@ namespace Santolibre.Map.Search.Lib.Services
                 (!includeTagsByKeys.Contains(x.Key) && !includeTagsByKeysStartsWith.Any(y => x.Key.StartsWith(y))));
 
             // Merge keys and values and filter list
-            var excludeTagKeyValues = new string[] { "amenity", "brand", "cuisine", "leisure", "operator", "shelter_type", "sport", "surface", "tourism", "yes" };
+            var excludeTagKeyValues = new string[] { "brand", "cuisine", "operator", "shelter_type", "surface", "yes" };
 
             var tagKeyValueSearchEnglish = element.Tags.Select(x => x.Key.ToLower().Replace(":", " ").Replace("_", " ")).Concat(element.Tags.Select(x => x.Value.ToLower().Replace(":", " ").Replace("_", " "))).Distinct().ToList();
             tagKeyValueSearchEnglish.RemoveAll(x =>
@@ -161,24 +159,20 @@ namespace Santolibre.Map.Search.Lib.Services
         {
             try
             {
-                using (var session = _documentService.OpenDocumentSession())
-                {
-                    foreach (var pointOfInterest in pointsOfInterest)
-                    {
-                        session.Store(pointOfInterest);
-                    }
-                    _logger.LogTrace("Saving points of interest batch");
-                    session.SaveChanges();
-                }
-                _logger.LogTrace("Clearing points of interest batch");
-
-                GC.Collect();
+                _logger.LogTrace("Saving points of interest batch");
+                _pointOfInterestRepository.SavePointsOfInterest(pointsOfInterest);
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "There was an error while saving the data (" + e.Message + ")");
             }
+
+            _logger.LogTrace("Clearing points of interest batch");
             pointsOfInterest.Clear();
+
+            var totalMemoryBefore = GC.GetTotalMemory(false);
+            GC.Collect();
+            _logger.LogTrace($"Garbage collection, TotalMemoryBefore={totalMemoryBefore}, TotalMemoryAfter={GC.GetTotalMemory(false)}");
         }
 
         public void RemoveOldPointsOfInterest(int days)
@@ -199,16 +193,12 @@ namespace Santolibre.Map.Search.Lib.Services
         public void AnalyzeIndexTerms()
         {
             _logger.LogInformation("Analyzing index terms");
-            var terms = _documentService.RunOperation(new GetTermsOperation("PointOfInterest/ByTagsEnglishAndCoordinates", "TagKeyValueSearch", null));
+            var terms = _documentService.RunOperation(new GetTermsOperation("PointOfInterest/ByTagsEnglish", "TagKeyValueSearch", null));
             var termDocumentCounts = new Dictionary<string, int>();
             foreach (var term in terms)
             {
-                using (var session = _documentService.OpenDocumentSession())
-                {
-                    var query = session.Query<PointOfInterest_ByTagsEnglishNameAndCoordinates.Result, PointOfInterest_ByTagsEnglishNameAndCoordinates>();
-                    var documentCount = query.Where(x => x.TagKeyValueSearch.Contains(term)).Count();
-                    termDocumentCounts.Add(term, documentCount);
-                }
+                var documentCount = _pointOfInterestRepository.CountPointsOfInterest(term);
+                termDocumentCounts.Add(term, documentCount);
             }
 
             foreach (var termDocumentCount in termDocumentCounts.OrderByDescending(x => x.Value))

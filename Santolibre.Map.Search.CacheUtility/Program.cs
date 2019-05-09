@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
+using Santolibre.Map.Search.Lib.Repositories;
 using Santolibre.Map.Search.Lib.Services;
 
 namespace Santolibre.Map.Search.CacheUtility
@@ -26,6 +27,7 @@ namespace Santolibre.Map.Search.CacheUtility
                 .AddSingleton<ISearchService, SearchService>()
                 .AddSingleton<ILocationSearchService, MapQuestSearchService>()
                 .AddSingleton<IDocumentService, DocumentService>()
+                .AddSingleton<IPointOfInterestRepository, PointOfInterestRepository>()
                 .AddSingleton<IConfiguration>(new ConfigurationBuilder().AddJsonFile("appsettings.json", optional: true, reloadOnChange: true).Build())
                 .AddLogging(builder =>
                 {

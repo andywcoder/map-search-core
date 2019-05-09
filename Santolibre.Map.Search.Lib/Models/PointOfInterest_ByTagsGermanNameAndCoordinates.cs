@@ -22,6 +22,7 @@ namespace Santolibre.Map.Search.Lib.Models
                                       };
 
             Index("TagKeyValueSearch", FieldIndexing.Search);
+            Analyze("TagKeyValueSearch", "Santolibre.RavenDB.Analyzers.LowerCaseNonDiacriticEnglishStopWordsAnalyzer, Santolibre.RavenDB.Analyzers");
         }
     }
 }

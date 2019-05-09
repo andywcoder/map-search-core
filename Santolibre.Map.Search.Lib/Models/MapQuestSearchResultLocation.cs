@@ -1,5 +1,4 @@
-﻿using System;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace Santolibre.Map.Search.Lib.Models
 {
@@ -41,53 +40,23 @@ namespace Santolibre.Map.Search.Lib.Models
                 case "COUNTY":
                     return 50;
                 case "CITY":
-                    return 30;
+                    return 20;
                 case "ZIP":
-                    return 30;
-                case "ZIP_EXTENDED":
-                    return 30;
-                case "NEIGHBORHOOD":
                     return 10;
+                case "ZIP_EXTENDED":
+                    return 10;
+                case "NEIGHBORHOOD":
+                    return 5;
                 case "STREET":
-                    return 5;
+                    return 1;
                 case "INTERSECTION":
-                    return 5;
+                    return 1;
                 case "ADDRESS":
-                    return 5;
+                    return 1;
                 case "POINT":
-                    return 5;
+                    return 1;
             }
             return 10;
-        }
-
-        public int GetZoomLevel()
-        {
-            switch (GeocodeQuality)
-            {
-                case "COUNTRY":
-                    return 10;
-                case "STATE":
-                    return 10;
-                case "COUNTY":
-                    return 11;
-                case "CITY":
-                    return 14;
-                case "ZIP":
-                    return 15;
-                case "ZIP_EXTENDED":
-                    return 15;
-                case "NEIGHBORHOOD":
-                    return 16;
-                case "STREET":
-                    return 18;
-                case "INTERSECTION":
-                    return 18;
-                case "ADDRESS":
-                    return 18;
-                case "POINT":
-                    return 18;
-            }
-            return 15;
         }
     }
 }
