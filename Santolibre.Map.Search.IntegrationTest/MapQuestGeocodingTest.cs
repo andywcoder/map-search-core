@@ -1,22 +1,20 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Santolibre.Map.Search.Lib.Services;
+using Santolibre.Map.Search.Geocoding.MapQuest;
 
-namespace Santolibre.Map.Search.LibTest
+namespace Santolibre.Map.Search.IntegrationTest
 {
     [TestClass]
-    [DeploymentItem("TestData/Localization/country-names.en.json")]
-    public class MapQuestSearchServiceLiveTest
+    public class MapQuestGeocodingTest
     {
         private void Search(string locationQuery, bool isValid)
         {
             // Arrange
-            var localizationService = new LocalizationService(@"TestData\Localization");
             var configuration = new Mock<IConfiguration>();
-            configuration.SetupKeyValuePair("MapQuestSearchApiKey", "API-KEY");
+            configuration.SetupKeyValuePair("AppSettings:MapQuestSearchApiKey", "Fmjtd%7Cluur29u72q%2C7l%3Do5-90rwq0");
 
-            var mapQuestSearchService = new MapQuestSearchService(localizationService, configuration.Object);
+            var mapQuestSearchService = new MapQuestGeocodingService(configuration.Object);
 
             // Act
             var location = mapQuestSearchService.Search(locationQuery);
@@ -37,7 +35,7 @@ namespace Santolibre.Map.Search.LibTest
         [TestMethod]
         public void Search_CityGerman_Location()
         {
-            Search("Luzern, Schweiz", true);
+            Search("Luzern, Schweiz", false);
         }
 
         [TestMethod]

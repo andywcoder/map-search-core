@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Moq;
 
-namespace Santolibre.Map.Search.LibTest
+namespace Santolibre.Map.Search.IntegrationTest
 {
     public static class ConfigurationHelper
     {

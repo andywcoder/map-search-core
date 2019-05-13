@@ -1,6 +1,5 @@
 ﻿using Raven.Client.Documents;
 using Santolibre.Map.Search.Lib.Models;
-using Santolibre.Map.Search.Lib.Services;
 using Santolibre.RavenDB.Analyzers;
 using System;
 using System.Collections.Generic;
@@ -10,9 +9,9 @@ namespace Santolibre.Map.Search.Lib.Repositories
 {
     public class PointOfInterestRepository : IPointOfInterestRepository
     {
-        private readonly IDocumentService _documentService;
+        private readonly IDocumentRepository _documentService;
 
-        public PointOfInterestRepository(IDocumentService documentService)
+        public PointOfInterestRepository(IDocumentRepository documentService)
         {
             _documentService = documentService;
         }
@@ -40,7 +39,7 @@ namespace Santolibre.Map.Search.Lib.Repositories
                 return pointsOfInterest;
             }
         }
-               
+
         public void SavePointsOfInterest(List<PointOfInterest> pointsOfInterest)
         {
             using (var session = _documentService.OpenDocumentSession())

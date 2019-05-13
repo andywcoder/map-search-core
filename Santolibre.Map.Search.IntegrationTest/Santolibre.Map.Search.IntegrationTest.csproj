@@ -4,6 +4,8 @@
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <IsPackable>false</IsPackable>
   <Configurations>Debug;Production</Configurations>
+  <AssemblyName>Santolibre.Map.Search.IntegrationTest</AssemblyName>
+  <RootNamespace>Santolibre.Map.Search.IntegrationTest</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,12 +17,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Santolibre.Map.Search.Lib\Santolibre.Map.Search.Lib.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="TestData\Localization\country-names.en.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>

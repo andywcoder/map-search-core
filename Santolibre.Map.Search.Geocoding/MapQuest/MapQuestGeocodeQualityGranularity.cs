@@ -1,6 +1,6 @@
-﻿namespace Santolibre.Map.Search.Lib.Models
+﻿namespace Santolibre.Map.Search.Geocoding.MapQuest
 {
-    public enum GeocodeQualityGranularity
+    public enum MapQuestGeocodeQualityGranularity
     {
         Point,
         Address,

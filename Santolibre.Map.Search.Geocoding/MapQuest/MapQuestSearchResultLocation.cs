@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Santolibre.Map.Search.Lib.Models
+namespace Santolibre.Map.Search.Geocoding.MapQuest
 {
     public class MapQuestSearchResultLocation
     {
@@ -27,7 +27,7 @@ namespace Santolibre.Map.Search.Lib.Models
         public string Type { get; set; }
 
         [JsonProperty("latLng")]
-        public GeoLocation Location { get; set; }
+        public GeoCoordinates Location { get; set; }
 
         public double GetRadius()
         {

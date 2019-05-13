@@ -1,4 +1,6 @@
-﻿namespace Santolibre.Map.Search.Lib.Models
+﻿using Santolibre.Map.Search.Geocoding;
+
+namespace Santolibre.Map.Search.WebService.ApiControllers.v1.Models
 {
     public class Location
     {

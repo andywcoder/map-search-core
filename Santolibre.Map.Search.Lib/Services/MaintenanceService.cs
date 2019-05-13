@@ -17,11 +17,11 @@ namespace Santolibre.Map.Search.Lib.Services
 {
     public class MaintenanceService : IMaintenanceService
     {
-        private readonly IDocumentService _documentService;
+        private readonly IDocumentRepository _documentService;
         private readonly IPointOfInterestRepository _pointOfInterestRepository;
         private readonly ILogger<IMaintenanceService> _logger;
 
-        public MaintenanceService(IDocumentService documentService, IPointOfInterestRepository pointOfInterestRepository, ILogger<IMaintenanceService> logger)
+        public MaintenanceService(IDocumentRepository documentService, IPointOfInterestRepository pointOfInterestRepository, ILogger<IMaintenanceService> logger)
         {
             _documentService = documentService;
             _pointOfInterestRepository = pointOfInterestRepository;
@@ -144,13 +144,13 @@ namespace Santolibre.Map.Search.Lib.Services
         {
             if (element is Node node && node.Longitude.HasValue && node.Latitude.HasValue)
             {
-                pointOfInterest.Location = new GeoLocation() { Latitude = node.Latitude.Value, Longitude = node.Longitude.Value };
+                pointOfInterest.GeoCoordinates = new GeoCoordinates(node.Latitude.Value, node.Longitude.Value);
             }
             else
             {
                 if (element is CompleteWay way)
                 {
-                    pointOfInterest.Location = new GeoLocation() { Latitude = way.Nodes.Average(x => x.Latitude.Value), Longitude = way.Nodes.Average(x => x.Longitude.Value) };
+                    pointOfInterest.GeoCoordinates = new GeoCoordinates(way.Nodes.Average(x => x.Latitude.Value), way.Nodes.Average(x => x.Longitude.Value));
                 }
             }
         }

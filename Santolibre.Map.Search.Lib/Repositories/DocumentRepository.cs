@@ -7,14 +7,14 @@ using Raven.Client.ServerWide;
 using Raven.Client.ServerWide.Operations;
 using Santolibre.Map.Search.Lib.Models;
 
-namespace Santolibre.Map.Search.Lib.Services
+namespace Santolibre.Map.Search.Lib.Repositories
 {
-    public class DocumentService : IDocumentService
+    public class DocumentRepository : IDocumentRepository
     {
         private readonly IConfiguration _configuration;
         private readonly IDocumentStore _documentStore;
 
-        public DocumentService(IConfiguration configuration)
+        public DocumentRepository(IConfiguration configuration)
         {
             _configuration = configuration;
             _documentStore = new DocumentStore { Urls = new string[] { configuration.GetValue<string>("AppSettings:RavenDbUrl") }, Database = configuration.GetValue<string>("AppSettings:RavenDbDefaultDatabase") };

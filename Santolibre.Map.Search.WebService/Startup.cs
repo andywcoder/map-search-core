@@ -5,6 +5,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using Santolibre.Map.Search.Geocoding;
+using Santolibre.Map.Search.Geocoding.MapQuest;
 using Santolibre.Map.Search.Lib.Repositories;
 using Santolibre.Map.Search.Lib.Services;
 using System;
@@ -26,8 +28,8 @@ namespace Santolibre.Map.Search.WebService
             services.AddSingleton<ILocalizationService>(provider => new LocalizationService(Path.Combine(AppDomain.CurrentDomain.GetData("DataDirectory").ToString(), "Localization")));
             services.AddSingleton<IMaintenanceService, MaintenanceService>();
             services.AddSingleton<ISearchService, SearchService>();
-            services.AddSingleton<ILocationSearchService, MapQuestSearchService>();
-            services.AddSingleton<IDocumentService, DocumentService>();
+            services.AddSingleton<IGeocodingService, MapQuestGeocodingService>();
+            services.AddSingleton<IDocumentRepository, DocumentRepository>();
             services.AddSingleton<IPointOfInterestRepository, PointOfInterestRepository>();
             services.AddSingleton(AutoMapper.CreateMapper());
 

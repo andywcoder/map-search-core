@@ -1,9 +1,9 @@
 ﻿using Raven.Client.Documents.Operations;
 using Raven.Client.Documents.Session;
 
-namespace Santolibre.Map.Search.Lib.Services
+namespace Santolibre.Map.Search.Lib.Repositories
 {
-    public interface IDocumentService
+    public interface IDocumentRepository
     {
         IDocumentSession OpenDocumentSession();
         void RunDeleteByQueryOperation(DeleteByQueryOperation deleteByQueryOperation);

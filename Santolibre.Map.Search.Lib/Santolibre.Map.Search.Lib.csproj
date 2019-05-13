@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Santolibre.Map.Search.Geocoding\Santolibre.Map.Search.Geocoding.csproj" />
     <ProjectReference Include="..\Santolibre.RavenDB.Analyzers\Santolibre.RavenDB.Analyzers.csproj" />
   </ItemGroup>
 

@@ -1,4 +1,5 @@
-﻿using Santolibre.Map.Search.Lib.Models;
+﻿using Santolibre.Map.Search.Geocoding;
+using Santolibre.Map.Search.Lib.Models;
 using Santolibre.Map.Search.Lib.Repositories;
 using System;
 using System.Collections.Generic;
@@ -9,12 +10,14 @@ namespace Santolibre.Map.Search.Lib.Services
 {
     public class SearchService : ISearchService
     {
-        private readonly ILocationSearchService _locationSearchService;
+        private readonly IGeocodingService _geocodingService;
+        private readonly ILocalizationService _localizationService;
         private readonly IPointOfInterestRepository _pointOfInterestRepository;
 
-        public SearchService(ILocationSearchService locationSearchService, IPointOfInterestRepository pointOfInterestRepository)
+        public SearchService(IGeocodingService geocodingService, ILocalizationService localizationService, IPointOfInterestRepository pointOfInterestRepository)
         {
-            _locationSearchService = locationSearchService;
+            _geocodingService = geocodingService;
+            _localizationService = localizationService;
             _pointOfInterestRepository = pointOfInterestRepository;
         }
 
@@ -29,22 +32,30 @@ namespace Santolibre.Map.Search.Lib.Services
                 var combinerTerm = match.Groups[2].Captures[0].Value;
                 var locationTerm = match.Groups[3].Captures[0].Value;
 
-                var location = _locationSearchService.Search(locationTerm);
-                if (location != null)
+                var geocodingResult = _geocodingService.Search(locationTerm);
+                if (geocodingResult != null)
                 {
-                    var pointsOfInterest = _pointOfInterestRepository.GetPointsOfInterest(poiTerm, false, location.GeoLocation.Latitude, location.GeoLocation.Longitude, location.Radius, 200);
+                    searchResult.Center = new GeoCoordinates(geocodingResult.GeoCoordinates.Latitude, geocodingResult.GeoCoordinates.Longitude);
+                    searchResult.Radius = geocodingResult.Radius;
+
+                    var pointsOfInterest = _pointOfInterestRepository.GetPointsOfInterest(poiTerm, false, geocodingResult.GeoCoordinates.Latitude, geocodingResult.GeoCoordinates.Longitude, geocodingResult.Radius, 200);
                     if (pointsOfInterest.Any())
                     {
-                        searchResult.PointsOfInterest = pointsOfInterest;
-                        searchResult.Location = location.GeoLocation;
-                        searchResult.Radius = location.Radius;
+                        searchResult.Locations = pointsOfInterest.ConvertAll(x => (Location)x);
+
                     }
                     else
                     {
-                        searchResult.Name = location.Name;
-                        searchResult.Location = location.GeoLocation;
-                        searchResult.Radius = location.Radius;
-                        searchResult.GeocodeQuality = location.GeocodeQuality;
+                        searchResult.Locations = new List<Location>()
+                        {
+                            new Location()
+                            {
+                                Name = GetGeocodingResultName(geocodingResult),
+                                GeoCoordinates = new GeoCoordinates(geocodingResult.GeoCoordinates.Latitude, geocodingResult.GeoCoordinates.Longitude),
+                                Category = "address",
+                                Type = "address"
+                            }
+                        };
                     }
                 }
             }
@@ -52,32 +63,39 @@ namespace Santolibre.Map.Search.Lib.Services
             {
                 var unspecificTerm = searchTerm;
 
-                var location = _locationSearchService.Search(unspecificTerm);
-                if (location != null)
+                var geocodingResult = _geocodingService.Search(unspecificTerm);
+                if (geocodingResult != null)
                 {
-                    searchResult.Name = location.Name;
-                    searchResult.Location = location.GeoLocation;
-                    searchResult.Radius = location.Radius;
-                    searchResult.GeocodeQuality = location.GeocodeQuality;
+                    searchResult.Center = new GeoCoordinates(geocodingResult.GeoCoordinates.Latitude, geocodingResult.GeoCoordinates.Longitude);
+                    searchResult.Radius = geocodingResult.Radius;
+                    searchResult.Locations = new List<Location>()
+                    {
+                        new Location()
+                        {
+                            Name = GetGeocodingResultName(geocodingResult),
+                            GeoCoordinates = new GeoCoordinates(geocodingResult.GeoCoordinates.Latitude, geocodingResult.GeoCoordinates.Longitude),
+                            Category = "address",
+                            Type = "address"
+                        }
+                    };
                 }
                 else if (latitude.HasValue && longitude.HasValue)
                 {
                     var pointsOfInterest = _pointOfInterestRepository.GetPointsOfInterest(unspecificTerm, false, latitude.Value, longitude.Value, null, 200);
                     if (pointsOfInterest.Any())
                     {
-                        searchResult.PointsOfInterest = pointsOfInterest;
                         if (pointsOfInterest.Count == 1)
                         {
-                            searchResult.Location = pointsOfInterest[0].Location;
+                            searchResult.Center = pointsOfInterest[0].GeoCoordinates;
                             searchResult.Radius = 1;
-
                         }
                         else
                         {
-                            searchResult.Location = new GeoLocation() { Latitude = latitude.Value, Longitude = longitude.Value };
-                            pointsOfInterest.Sort((x, y) => x.Location.GetDistanceToPoint(searchResult.Location).CompareTo(y.Location.GetDistanceToPoint(searchResult.Location)));
-                            searchResult.Radius = pointsOfInterest[pointsOfInterest.Count / 2].Location.GetDistanceToPoint(searchResult.Location);
+                            searchResult.Center = new GeoCoordinates(latitude.Value, longitude.Value);
+                            pointsOfInterest.Sort((x, y) => x.GeoCoordinates.GetDistanceToPoint(searchResult.Center).CompareTo(y.GeoCoordinates.GetDistanceToPoint(searchResult.Center)));
+                            searchResult.Radius = pointsOfInterest[pointsOfInterest.Count / 2].GeoCoordinates.GetDistanceToPoint(searchResult.Center);
                         }
+                        searchResult.Locations = pointsOfInterest.ConvertAll(x => (Location)x);
                     }
                 }
             }
@@ -96,18 +114,18 @@ namespace Santolibre.Map.Search.Lib.Services
                 var combinerTerm = match.Groups[2].Captures[0].Value;
                 var locationTerm = match.Groups[3].Captures[0].Value;
 
-                var location = _locationSearchService.Search(locationTerm);
-                if (location != null)
+                var geocodingResult = _geocodingService.Search(locationTerm);
+                if (geocodingResult != null)
                 {
-                    var poiSuggestions = GetPointOfInterestSuggestions(poiTerm, location.GeoLocation.Latitude, location.GeoLocation.Longitude, location.Radius, 5);
+                    var poiSuggestions = GetPointOfInterestSuggestions(poiTerm, geocodingResult.GeoCoordinates.Latitude, geocodingResult.GeoCoordinates.Longitude, geocodingResult.Radius, 5);
                     if (poiSuggestions.Any())
                     {
-                        poiSuggestions.ForEach(x => { x.Value = $"{x.Value} {combinerTerm} {location.Name}"; });
+                        poiSuggestions.ForEach(x => { x.Value = $"{x.Value} {combinerTerm} {GetGeocodingResultName(geocodingResult)}"; });
                         suggestions.AddRange(poiSuggestions);
                     }
                     else
                     {
-                        suggestions.Add(new Suggestion() { Value = location.Name });
+                        suggestions.Add(new Suggestion() { Value = GetGeocodingResultName(geocodingResult) });
                     }
                 }
             }
@@ -115,10 +133,10 @@ namespace Santolibre.Map.Search.Lib.Services
             {
                 var unspecificTerm = searchTerm;
 
-                var location = _locationSearchService.Search(unspecificTerm);
-                if (location != null)
+                var geocodingResult = _geocodingService.Search(unspecificTerm);
+                if (geocodingResult != null)
                 {
-                    suggestions.Add(new Suggestion() { Value = location.Name });
+                    suggestions.Add(new Suggestion() { Value = GetGeocodingResultName(geocodingResult) });
                 }
                 else if (latitude.HasValue && longitude.HasValue)
                 {
@@ -144,6 +162,18 @@ namespace Santolibre.Map.Search.Lib.Services
                 suggestions.Add(new Suggestion() { Value = string.Join(" ", valueComponents.Distinct().Select(x => x.First().ToString().ToUpper() + x.Substring(1))) });
             }
             return suggestions.Distinct().ToList();
+        }
+
+        private string GetGeocodingResultName(GeocodingResult geocodingResult)
+        {
+            var name = new List<string>();
+            if (!string.IsNullOrEmpty(geocodingResult.Street))
+                name.Add(geocodingResult.Street);
+            if (!string.IsNullOrEmpty(geocodingResult.AdminArea))
+                name.Add(geocodingResult.AdminArea);
+            if (!string.IsNullOrEmpty(geocodingResult.CountryCode))
+                name.Add(_localizationService.GetCountryName(geocodingResult.CountryCode));
+            return string.Join(", ", name);
         }
     }
 }
