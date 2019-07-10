@@ -59,7 +59,9 @@ A point of interest search service that uses OpenStreetMap data. It uses RavenDB
 
 Search for something at a specific address
 
-```GET https://search.map.santolibre.net/api/v1/search/table%20tennis%20near%20berlin```
+```GET https://search.map.santolibre.net/api/v1/search/italian restaurant in luzern```
+
+```GET https://search.map.santolibre.net/api/v1/search/table tennis near berlin```
 
 Search for something at a specific location
 
