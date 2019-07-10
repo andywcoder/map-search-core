@@ -2,11 +2,9 @@
 
 A point of interest search service that uses OpenStreetMap data. It uses RavenDB for storing and searching the imported OSM data. Address geocoding is done with the MapQuest OSM API, but you could plug in any geocoding provider.
 
-This is the ASP.NET Core MVC version, for the ASP.NET Web API 2 version go to https://github.com/Andy9FromSpace/map-search
-
 ## API
 
-```GET https://search.map.santolibre.net/api/v1/search/[term]?latitude=[latitude]&longitude=[longitude]&searchRadius=[radius]```
+```GET https://search.map.santolibre.net/api/v1/search/[term]?latitude=[latitude]&longitude=[longitude]```
 
 ### Parameters
 
@@ -17,19 +15,15 @@ This is the ASP.NET Core MVC version, for the ASP.NET Web API 2 version go to ht
     </tr>
     <tr>
       <td>term</td>
-      <td>The term is in the form <strong>What</strong> near|in|around <strong>Where</strong>.<br />If there is no <strong>Where</strong> part, latitude and longitude have to specified to define the search location.</td>
+      <td>The term is in the form <strong>What</strong> near|in|around <strong>Where</strong>.<br />If there is no <strong>Where</strong> part, latitude and longitude have to be specified to define the search location.</td>
     </tr>
     <tr>
       <td>latitude</td>
-      <td>Latitude of the search location</td>
+      <td><strong>Optional</strong> latitude of the search location</td>
     </tr>
     <tr>
       <td>longitude</td>
-      <td>Longitude of the search location</td>
-    </tr>
-    <tr>
-      <td>searchRadius</td>
-      <td>Search radius in kilometers</td>
+      <td><strong>Optional</strong> longitude of the search location</td>
     </tr>
 </table>
 
@@ -37,25 +31,25 @@ This is the ASP.NET Core MVC version, for the ASP.NET Web API 2 version go to ht
 
 ```
 {
-  "name": [address name],
-  "location": {
+  "radius": [search radius],
+  "center": {
     "lat": [latitude],
     "lng": [longitude]
   },
-  "radius": [search radius],
-  "pointsOfInterest": [{
-        "id": [osm node id],
-        "location": {
-          "lat": [latitude],
-          "lng": [longitude]
-        },
-        "category": [category],
-        "type": [type],
-        "tags": {
-          [tag key]: [tag value],
-          [tag key]: [tag value]
-        },
-        "dateUpdated": [import date]
+  "locations": [{
+      "id": [osm node id],
+      "tags": {
+        [tag key]: [tag value],
+        [tag key]: [tag value]
+      },
+      "dateUpdated": [import date],
+      "name": [name]
+      "geoCoordinates": {
+        "lat": [latitude],
+        "lng": [longitude]
+      },
+      "category": [category],
+      "type": [type]
     }
   ]
 }
@@ -65,11 +59,11 @@ This is the ASP.NET Core MVC version, for the ASP.NET Web API 2 version go to ht
 
 Search for something at a specific address
 
-```GET https://search.map.santolibre.net/api/v1/search/table%20tennis%20near%20berlin?searchRadius=5```
+```GET https://search.map.santolibre.net/api/v1/search/table%20tennis%20near%20berlin```
 
 Search for something at a specific location
 
-```GET https://search.map.santolibre.net/api/v1/search/atm?latitude=51.511373&longitude=-0.119230&searchRadius=2```
+```GET https://search.map.santolibre.net/api/v1/search/atm?latitude=51.511373&longitude=-0.119230```
 
 ## Cache utility
 
@@ -81,11 +75,11 @@ Downloading data
 
 Importing data
 
-```Santolibre.Map.Search.CacheUtility.exe --import=C:\temp\osm\europe-latest.osm.pbf```
+```dotnet Santolibre.Map.Search.CacheUtility.dll --import=C:\temp\osm\europe-latest.osm.pbf```
 
 Removing old data
 
-```Santolibre.Map.Search.CacheUtility.exe --remove-older-than=7```
+```dotnet Santolibre.Map.Search.CacheUtility.dll --remove-older-than=7```
 
 ### Parameters
 
@@ -101,6 +95,10 @@ Removing old data
     <tr>
       <td>--remove-older-than=[days]</td>
       <td>Remove data older than number of [days]</td>
+    </tr>
+    <tr>
+      <td>--analyze-index-terms</td>
+      <td>Shows how many times index terms are referenced by points of interests</td>
     </tr>
     <tr>
       <td>--compact-database</td>

@@ -5,6 +5,7 @@ using OsmSharp.Streams;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Operations;
 using Raven.Client.Documents.Operations.Indexes;
+using Santolibre.Map.Search.Geocoding;
 using Santolibre.Map.Search.Lib.Models;
 using Santolibre.Map.Search.Lib.Repositories;
 using System;

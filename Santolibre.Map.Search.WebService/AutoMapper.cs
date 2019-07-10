@@ -12,6 +12,8 @@ namespace Santolibre.Map.Search.WebService
             {
                 x.AllowNullCollections = true;
                 x.CreateMap<Lib.Models.SearchResult, ApiControllers.v1.Models.SearchResult>();
+                x.CreateMap<Lib.Models.Location, ApiControllers.v1.Models.Location>()
+                    .Include<Lib.Models.PointOfInterest, ApiControllers.v1.Models.PointOfInterest>();
                 x.CreateMap<Lib.Models.PointOfInterest, ApiControllers.v1.Models.PointOfInterest>();
                 x.CreateMap<Lib.Models.Suggestion, ApiControllers.v1.Models.Suggestion>();
             });

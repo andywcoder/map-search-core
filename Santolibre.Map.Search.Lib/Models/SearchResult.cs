@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Santolibre.Map.Search.Geocoding;
+using System.Collections.Generic;
 
 namespace Santolibre.Map.Search.Lib.Models
 {

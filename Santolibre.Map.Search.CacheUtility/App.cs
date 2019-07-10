@@ -46,6 +46,7 @@ namespace Santolibre.Map.Search.CacheUtility
                 Console.WriteLine();
                 Console.WriteLine("--import=[filename]");
                 Console.WriteLine("--remove-older-than=[days]");
+                Console.WriteLine("--analyze-index-terms");
                 Console.WriteLine("--compact-database");
             }
         }

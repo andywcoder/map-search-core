@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Santolibre.Map.Search.Lib
+namespace Santolibre.Map.Search.Geocoding
 {
     public static class FloatExtensions
     {

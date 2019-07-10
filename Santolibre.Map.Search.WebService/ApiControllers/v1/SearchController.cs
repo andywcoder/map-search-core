@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Santolibre.Map.Search.Lib.Models;
 using Santolibre.Map.Search.Lib.Services;
+using Santolibre.Map.Search.WebService.ApiControllers.v1.Models;
 
 namespace Santolibre.Map.Search.WebService.ApiControllers.v1
 {

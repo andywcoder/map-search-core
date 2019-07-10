@@ -13,7 +13,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Santolibre.Map.Search.Cache
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Santolibre.RavenDB.Analyzers", "Santolibre.RavenDB.Analyzers\Santolibre.RavenDB.Analyzers.csproj", "{C952BA6B-26F7-4FBE-A83F-FCC569B33040}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Santolibre.Map.Search.Geocoding", "Santolibre.Map.Search.Geocoding\Santolibre.Map.Search.Geocoding.csproj", "{532C25FF-A96A-4D1A-A156-73A2B14001BE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Santolibre.Map.Search.Geocoding", "Santolibre.Map.Search.Geocoding\Santolibre.Map.Search.Geocoding.csproj", "{532C25FF-A96A-4D1A-A156-73A2B14001BE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D0DB767D-28DD-4B70-89D4-BF2A70EF4C5F}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
