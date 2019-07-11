@@ -1,6 +1,10 @@
 # map-search
 
-A point of interest search service that uses OpenStreetMap data. It uses RavenDB for storing and searching the imported OSM data. Address geocoding is done with the MapQuest OSM API, but you could plug in any geocoding provider.
+A point of interest search service that uses OpenStreetMap data. It uses RavenDB for storing and searching the imported OSM data. Address geocoding is done with the MapQuest OSM API, but any geocoding provider could be used instead.
+
+The POI search is based on OpenStreetMap tags and values, so the search terms have to be in English. A search for "table tennis" and "atm" will work, but a search for "Tischtennis", "ping pong table" and "cash dispenser" won't.
+
+Because the service separates address and point of interest search, a special term has to be used to separate the two. Currently those terms are "near", "in" and "around".
 
 ## API
 
@@ -107,3 +111,11 @@ Removing old data
       <td>Compact the database</td>
     </tr>
 </table>
+
+## Demo service
+
+The search service is running on https://map.santolibre.net, but we warned that the server is not very fast.
+
+The following screenshot shows [chinese restaurants in Vienna](https://map.santolibre.net?search=chinese%20restaurant%20in%20vienna)
+
+![Screenshot Map Search](_Data/screenshot_map_search.png)
