@@ -37,7 +37,9 @@ namespace Santolibre.Map.Search.CacheUtility
         {
             return new ServiceCollection()
                 .AddSingleton<ILocalizationService>(provider => new LocalizationService(null))
+                .AddSingleton<ITranslationService, TranslationService>()
                 .AddSingleton<IMaintenanceService, MaintenanceService>()
+                .AddSingleton<ITranslationRepository, TranslationRepository>()
                 .AddSingleton<IDocumentRepository, DocumentRepository>()
                 .AddSingleton<IPointOfInterestRepository, PointOfInterestRepository>()
                 .AddSingleton<IConfiguration>(new ConfigurationBuilder().AddJsonFile("appsettings.json", optional: true, reloadOnChange: true).Build())

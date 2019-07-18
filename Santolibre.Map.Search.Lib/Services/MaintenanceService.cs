@@ -19,17 +19,19 @@ namespace Santolibre.Map.Search.Lib.Services
     public class MaintenanceService : IMaintenanceService
     {
         private readonly IDocumentRepository _documentService;
+        private readonly ITranslationService _translationService;
         private readonly IPointOfInterestRepository _pointOfInterestRepository;
         private readonly ILogger<IMaintenanceService> _logger;
 
-        public MaintenanceService(IDocumentRepository documentService, IPointOfInterestRepository pointOfInterestRepository, ILogger<IMaintenanceService> logger)
+        public MaintenanceService(IDocumentRepository documentService, ITranslationService translationService, IPointOfInterestRepository pointOfInterestRepository, ILogger<IMaintenanceService> logger)
         {
             _documentService = documentService;
+            _translationService = translationService;
             _pointOfInterestRepository = pointOfInterestRepository;
             _logger = logger;
         }
 
-        public void ImportPointsOfInterest(string filename)
+        public void ImportPointsOfInterest(string filename, Language language)
         {
             _logger.LogInformation("Importing points of interest from " + filename);
             _logger.LogTrace("Filtering out points of interest that don't contain one of the following tag keys: sport, amenity, leisure, shop, tourism");
@@ -65,7 +67,7 @@ namespace Santolibre.Map.Search.Lib.Services
                                 };
                                 SetName(element, pointOfInterest);
                                 SetCategoryAndType(element, pointOfInterest, includeElementsWithTagKeys);
-                                SetTagKeyValueSearch(element, pointOfInterest);
+                                SetTagKeyValueSearch(element, pointOfInterest, language);
                                 SetLocation(element, pointOfInterest);
 
                                 if (!pointsOfInterest.Any(x => x.Id == pointOfInterest.Id) && pointOfInterest.TagKeyValueSearch["en"].Any())
@@ -115,7 +117,7 @@ namespace Santolibre.Map.Search.Lib.Services
             }
         }
 
-        private void SetTagKeyValueSearch(ICompleteOsmGeo element, PointOfInterest pointOfInterest)
+        private void SetTagKeyValueSearch(ICompleteOsmGeo element, PointOfInterest pointOfInterest, Language language)
         {
             // Filter tags by keys and values
             var excludeTagsByValues = new string[] { "no", "limited" };
@@ -136,7 +138,14 @@ namespace Santolibre.Map.Search.Lib.Services
             tagKeyValueSearchEnglish.RemoveAll(x =>
                 excludeTagKeyValues.Contains(x));
 
-            pointOfInterest.TagKeyValueSearch["en"] = tagKeyValueSearchEnglish;
+            if (language.HasFlag(Language.EN))
+            {
+                pointOfInterest.TagKeyValueSearch["en"] = tagKeyValueSearchEnglish;
+            }
+            if (language.HasFlag(Language.DE))
+            {
+                pointOfInterest.TagKeyValueSearch["de"] = _translationService.GetTranslation("en", "de", tagKeyValueSearchEnglish);
+            }
 
             _logger.LogTrace($"Filtered tags, Id={pointOfInterest.Id}, FilteredTagKeyValues={string.Join(", ", pointOfInterest.TagKeyValueSearch["en"])}");
         }

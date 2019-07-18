@@ -16,7 +16,16 @@ namespace Santolibre.Map.Search.Lib.Services
             _translationRepository = translationRepository;
         }
 
-        public string[] GetTranslation(string from, string to, string[] terms)
+        public void PopulateCache(List<(string From, string To, string Term, string TranslatedTerm)> terms)
+        {
+            foreach (var term in terms)
+            {
+                var key = $"{term.From}_{term.To}_{term.Term.ToLower()}";
+                _memoryCache.Set(key, term.TranslatedTerm);
+            }
+        }
+
+        public List<string> GetTranslation(string from, string to, List<string> terms)
         {
             var translatedTerms = new List<string>();
             var termsToTranslate = new List<string>();
@@ -38,15 +47,15 @@ namespace Santolibre.Map.Search.Lib.Services
             var translationResults = _translationRepository.GetTranslationAsync(from, to, termsToTranslate).Result;
             foreach (var translationResult in translationResults)
             {
-                var term = translationResult.SourceText.Text;
-                var translatedTerm = translationResult.Translations.First().Text.ToLower();
+                var term = translationResult.NormalizedSource;
+                var translatedTerm = translationResult.Translations.First().NormalizedTarget.ToLower();
                 var key = $"{from}_{to}_{term.ToLower()}";
 
                 translatedTerms.Add(translatedTerm);
                 _memoryCache.Set(key, translatedTerm);
             }
 
-            return translatedTerms.ToArray();
+            return translatedTerms;
         }
     }
 }

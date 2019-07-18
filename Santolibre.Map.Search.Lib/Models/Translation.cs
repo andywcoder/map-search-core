@@ -2,10 +2,11 @@
 {
     public class Translation
     {
-        public string Text { get; set; }
-        public TextResult Transliteration { get; set; }
-        public string To { get; set; }
-        public Alignment Alignment { get; set; }
-        public SentenceLength SentLen { get; set; }
+        public string NormalizedTarget { get; set; }
+        public string DisplayTarget { get; set; }
+        public string OosTag { get; set; }
+        public float Confidence { get; set; }
+        public string PrefixWord { get; set; }
+        public BackTranslation[] BackTranslations { get; set; }
     }
 }

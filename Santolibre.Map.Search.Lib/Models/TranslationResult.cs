@@ -2,8 +2,8 @@
 {
     public class TranslationResult
     {
-        public DetectedLanguage DetectedLanguage { get; set; }
-        public TextResult SourceText { get; set; }
+        public string NormalizedSource { get; set; }
+        public string DisplaySource { get; set; }
         public Translation[] Translations { get; set; }
     }
 }

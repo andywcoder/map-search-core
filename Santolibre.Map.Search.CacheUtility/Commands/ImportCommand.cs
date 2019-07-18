@@ -1,6 +1,7 @@
 ﻿using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Santolibre.Map.Search.Lib.Models;
 using Santolibre.Map.Search.Lib.Services;
 
 namespace Santolibre.Map.Search.CacheUtility.Commands
@@ -15,10 +16,11 @@ namespace Santolibre.Map.Search.CacheUtility.Commands
             command.Description = "Import data";
             command.HelpOption("-?|-h|--help");
             var osmPbfFile = command.Option("-f|--osm-pbf-file <OSM_PBF_FILE>", "[Required] OSM.PBF file to import", CommandOptionType.SingleValue).IsRequired();
+            var language = command.Option<Language>("-l|--languages <LANGUAGES>", "Supported languages for imported file", CommandOptionType.SingleValue);
 
             command.OnExecute(() =>
             {
-                command.GetRequiredService<ImportCommand>().Run(osmPbfFile.Value());
+                command.GetRequiredService<ImportCommand>().Run(osmPbfFile.Value(), language.ParsedValue);
                 return 0;
             });
         }
@@ -29,9 +31,9 @@ namespace Santolibre.Map.Search.CacheUtility.Commands
             _logger = logger;
         }
 
-        public void Run(string osmPbfFile)
+        public void Run(string osmPbfFile, Language language)
         {
-            _maintenanceService.ImportPointsOfInterest(osmPbfFile);
+            _maintenanceService.ImportPointsOfInterest(osmPbfFile, language);
         }
     }
 }

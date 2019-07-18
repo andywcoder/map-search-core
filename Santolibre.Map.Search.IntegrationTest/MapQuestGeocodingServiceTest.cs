@@ -6,7 +6,7 @@ using Santolibre.Map.Search.Geocoding.MapQuest;
 namespace Santolibre.Map.Search.IntegrationTest
 {
     [TestClass]
-    public class MapQuestGeocodingTest
+    public class MapQuestGeocodingServiceTest
     {
         private void Search(string locationQuery, bool isValid)
         {

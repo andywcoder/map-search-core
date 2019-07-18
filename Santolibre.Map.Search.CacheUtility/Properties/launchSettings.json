@@ -2,7 +2,7 @@
   "profiles": {
     "Santolibre.Map.Search.CacheUtility": {
       "commandName": "Project",
-      "commandLineArgs": "import --osm-pbf-file=\"C:\\Users\\AndreasWyss\\Dropbox\\Sample Data\\OSM.PBF\\switzerland-latest.osm.pbf\""
+      "commandLineArgs": "analyze --option=IndexTerms"
     }
   }
 }
