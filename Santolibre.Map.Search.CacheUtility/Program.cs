@@ -1,9 +1,12 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using McMaster.Extensions.CommandLineUtils;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
+using Santolibre.Map.Search.CacheUtility.Commands;
 using Santolibre.Map.Search.Lib.Repositories;
 using Santolibre.Map.Search.Lib.Services;
+using System;
 
 namespace Santolibre.Map.Search.CacheUtility
 {
@@ -12,9 +15,20 @@ namespace Santolibre.Map.Search.CacheUtility
         public static void Main(string[] args)
         {
             var servicesProvider = SetupServices();
-            var app = servicesProvider.GetRequiredService<App>();
 
-            app.Run(args);
+            try
+            {
+                var app = new CommandLineApplication();
+                app.Conventions
+                    .SetAppNameFromEntryAssembly()
+                    .UseConstructorInjection(servicesProvider);
+                RootCommand.Configure(app);
+                app.Execute(args);
+            }
+            catch (Exception e)
+            {
+                NLog.LogManager.GetCurrentClassLogger().Fatal(e.Message);
+            }
 
             NLog.LogManager.Shutdown();
         }
@@ -36,7 +50,10 @@ namespace Santolibre.Map.Search.CacheUtility
                         CaptureMessageProperties = true
                     });
                 })
-                .AddTransient<App>()
+                .AddTransient<ImportCommand>()
+                .AddTransient<PurgeCommand>()
+                .AddTransient<CompactCommand>()
+                .AddTransient<AnalyzeCommand>()
                 .BuildServiceProvider();
         }
     }
