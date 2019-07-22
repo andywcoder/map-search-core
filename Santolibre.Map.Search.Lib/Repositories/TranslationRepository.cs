@@ -19,7 +19,7 @@ namespace Santolibre.Map.Search.Lib.Repositories
             _configuration = configuration;
         }
 
-        public async Task<TranslationResult[]> GetTranslationAsync(string from, string to, IEnumerable<string> terms)
+        public async Task<TranslationResult[]> GetTranslationAsync(Language from, Language to, IEnumerable<string> terms)
         {
             using (var client = new HttpClient())
             {
@@ -27,7 +27,7 @@ namespace Santolibre.Map.Search.Lib.Repositories
                 {
                     var requestBody = JsonConvert.SerializeObject(terms.Select(x => new { Text = x }));
                     request.Method = HttpMethod.Post;
-                    request.RequestUri = new Uri($"https://api.cognitive.microsofttranslator.com/dictionary/lookup?api-version=3.0&from={from}&to={to}");
+                    request.RequestUri = new Uri($"https://api.cognitive.microsofttranslator.com/dictionary/lookup?api-version=3.0&from={from.ToString().ToLower()}&to={to.ToString().ToLower()}");
                     request.Content = new StringContent(requestBody, Encoding.UTF8, "application/json");
                     request.Headers.Add("Ocp-Apim-Subscription-Key", _configuration.GetValue<string>("AppSettings:AzureTranslatorSubscriptionKey"));
 

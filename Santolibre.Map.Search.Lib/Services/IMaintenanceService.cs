@@ -8,5 +8,7 @@ namespace Santolibre.Map.Search.Lib.Services
         void RemoveOldPointsOfInterest(int days);
         void CompactPointsOfInterest();
         void AnalyzeIndexTerms();
+        void UpdateTranslationCache(Language from, Language to);
+        void PopulateTranslationCache(Language language);
     }
 }

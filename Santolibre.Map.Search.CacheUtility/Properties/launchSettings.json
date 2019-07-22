@@ -2,7 +2,7 @@
   "profiles": {
     "Santolibre.Map.Search.CacheUtility": {
       "commandName": "Project",
-      "commandLineArgs": "analyze --option=IndexTerms"
+      "commandLineArgs": "update-translation-cache --from=EN --to=DE"
     }
   }
 }

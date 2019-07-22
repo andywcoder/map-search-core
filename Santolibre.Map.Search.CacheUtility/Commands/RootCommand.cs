@@ -14,6 +14,7 @@ namespace Santolibre.Map.Search.CacheUtility.Commands
             app.Command("compact", CompactCommand.Configure);
             app.Command("purge", PurgeCommand.Configure);
             app.Command("analyze", AnalyzeCommand.Configure);
+            app.Command("update-translation-cache", UpdateTranslationCacheCommand.Configure);
 
             app.OnExecute(() =>
             {

@@ -6,6 +6,6 @@ namespace Santolibre.Map.Search.Lib.Repositories
 {
     public interface ITranslationRepository
     {
-        Task<TranslationResult[]> GetTranslationAsync(string from, string to, IEnumerable<string> terms);
+        Task<TranslationResult[]> GetTranslationAsync(Language from, Language to, IEnumerable<string> terms);
     }
 }

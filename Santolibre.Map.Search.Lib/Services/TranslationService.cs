@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
+using Santolibre.Map.Search.Lib.Models;
 using Santolibre.Map.Search.Lib.Repositories;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +17,7 @@ namespace Santolibre.Map.Search.Lib.Services
             _translationRepository = translationRepository;
         }
 
-        public void PopulateCache(List<(string From, string To, string Term, string TranslatedTerm)> terms)
+        public void PopulateCache(List<(Language From, Language To, string Term, string TranslatedTerm)> terms)
         {
             foreach (var term in terms)
             {
@@ -25,9 +26,9 @@ namespace Santolibre.Map.Search.Lib.Services
             }
         }
 
-        public List<string> GetTranslation(string from, string to, List<string> terms)
+        public List<(string Source, string Destination)> GetTranslation(Language from, Language to, List<string> terms)
         {
-            var translatedTerms = new List<string>();
+            var translatedTerms = new List<(string, string)>();
             var termsToTranslate = new List<string>();
 
             foreach (var term in terms)
@@ -36,7 +37,7 @@ namespace Santolibre.Map.Search.Lib.Services
 
                 if (_memoryCache.TryGetValue(key, out string translatedTerm))
                 {
-                    translatedTerms.Add(translatedTerm);
+                    translatedTerms.Add((term, translatedTerm));
                 }
                 else
                 {
@@ -48,10 +49,12 @@ namespace Santolibre.Map.Search.Lib.Services
             foreach (var translationResult in translationResults)
             {
                 var term = translationResult.NormalizedSource;
-                var translatedTerm = translationResult.Translations.First().NormalizedTarget.ToLower();
+                var translatedTerm = translationResult.Translations.Any() ? 
+                    translationResult.Translations.First().NormalizedTarget.ToLower() :
+                    term;
                 var key = $"{from}_{to}_{term.ToLower()}";
 
-                translatedTerms.Add(translatedTerm);
+                translatedTerms.Add((term, translatedTerm));
                 _memoryCache.Set(key, translatedTerm);
             }
 

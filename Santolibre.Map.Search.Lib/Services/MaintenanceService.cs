@@ -21,13 +21,15 @@ namespace Santolibre.Map.Search.Lib.Services
         private readonly IDocumentRepository _documentService;
         private readonly ITranslationService _translationService;
         private readonly IPointOfInterestRepository _pointOfInterestRepository;
+        private readonly ITranslationCacheRepository _translationCacheRepository;
         private readonly ILogger<IMaintenanceService> _logger;
 
-        public MaintenanceService(IDocumentRepository documentService, ITranslationService translationService, IPointOfInterestRepository pointOfInterestRepository, ILogger<IMaintenanceService> logger)
+        public MaintenanceService(IDocumentRepository documentService, ITranslationService translationService, IPointOfInterestRepository pointOfInterestRepository, ITranslationCacheRepository translationCacheRepository, ILogger<IMaintenanceService> logger)
         {
             _documentService = documentService;
             _translationService = translationService;
             _pointOfInterestRepository = pointOfInterestRepository;
+            _translationCacheRepository = translationCacheRepository;
             _logger = logger;
         }
 
@@ -144,7 +146,7 @@ namespace Santolibre.Map.Search.Lib.Services
             }
             if (language.HasFlag(Language.DE))
             {
-                pointOfInterest.TagKeyValueSearch["de"] = _translationService.GetTranslation("en", "de", tagKeyValueSearchEnglish);
+                pointOfInterest.TagKeyValueSearch["de"] = _translationService.GetTranslation(Language.EN, Language.DE, tagKeyValueSearchEnglish).Select(x => x.Destination).ToList();
             }
 
             _logger.LogTrace($"Filtered tags, Id={pointOfInterest.Id}, FilteredTagKeyValues={string.Join(", ", pointOfInterest.TagKeyValueSearch["en"])}");
@@ -230,6 +232,34 @@ namespace Santolibre.Map.Search.Lib.Services
             _logger.LogInformation($"{termDocumentCounts.Count(x => x.Value == 1)} terms that have 1 points of interest, {termDocumentCounts.Where(x => x.Value == 1).Sum(x => x.Value)} points of interest in total");
             _logger.LogInformation($"{termDocumentCounts.Count(x => x.Value > 1 && x.Value < 10)} terms that have 2-9 points of interest, {termDocumentCounts.Where(x => x.Value > 1 && x.Value < 10).Sum(x => x.Value)} points of interest in total");
             _logger.LogInformation($"{termDocumentCounts.Count(x => x.Value >= 10)} terms that have 10 or more points of interest, {termDocumentCounts.Where(x => x.Value >= 10).Sum(x => x.Value)} points of interest in total");
+        }
+
+        public void UpdateTranslationCache(Language from, Language to)
+        {
+            var translationCache = new TranslationCache()
+            {
+                Id = "TagAndValues"
+            };
+
+            var terms = _documentService.RunOperation(new GetTermsOperation("PointOfInterest/ByTagsEnglish", "TagKeyValueSearch", null));
+            for (var i = 0; i < terms.Length; i += 10)
+            {
+                _translationService.GetTranslation(from, to, terms.Skip(i).Take(10).ToList()).ForEach(x =>
+                {
+                    translationCache.Terms.Add(x.Source, new Translations() { GermanTerm = x.Destination });
+                });
+            }
+
+            _translationCacheRepository.SaveTranslationCache(translationCache);
+        }
+
+        public void PopulateTranslationCache(Language language)
+        {
+            var translationCache = _translationCacheRepository.GetTranslationCache("TagAndValues");
+            if (language.HasFlag(Language.DE))
+            {
+                _translationService.PopulateCache(translationCache.Terms.Select(x => (Language.EN, Language.DE, x.Key, x.Value.GermanTerm)).ToList());
+            }
         }
     }
 }

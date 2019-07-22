@@ -42,6 +42,7 @@ namespace Santolibre.Map.Search.CacheUtility
                 .AddSingleton<ITranslationRepository, TranslationRepository>()
                 .AddSingleton<IDocumentRepository, DocumentRepository>()
                 .AddSingleton<IPointOfInterestRepository, PointOfInterestRepository>()
+                .AddSingleton<ITranslationCacheRepository, TranslationCacheRepository>()
                 .AddSingleton<IConfiguration>(new ConfigurationBuilder().AddJsonFile("appsettings.json", optional: true, reloadOnChange: true).Build())
                 .AddLogging(builder =>
                 {
@@ -56,6 +57,7 @@ namespace Santolibre.Map.Search.CacheUtility
                 .AddTransient<PurgeCommand>()
                 .AddTransient<CompactCommand>()
                 .AddTransient<AnalyzeCommand>()
+                .AddTransient<UpdateTranslationCacheCommand>()
                 .BuildServiceProvider();
         }
     }

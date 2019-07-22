@@ -33,6 +33,7 @@ namespace Santolibre.Map.Search.CacheUtility.Commands
 
         public void Run(string osmPbfFile, Language language)
         {
+            _maintenanceService.PopulateTranslationCache(language);
             _maintenanceService.ImportPointsOfInterest(osmPbfFile, language);
         }
     }
