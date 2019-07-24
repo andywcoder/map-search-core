@@ -15,12 +15,13 @@ namespace Santolibre.Map.Search.CacheUtility.Commands
         {
             command.Description = "Update translation cache";
             command.HelpOption("-?|-h|--help");
-            var from = command.Option<Language>("-f|--from <LANGUAGE>", "Source language)", CommandOptionType.SingleValue);
-            var to = command.Option<Language>("-t|--to <LANGUAGE>", "Destination language)", CommandOptionType.SingleValue);
+            var from = command.Option<Language>("-f|--from <LANGUAGE>", "Source language", CommandOptionType.SingleValue);
+            var to = command.Option<Language>("-t|--to <LANGUAGE>", "Destination language", CommandOptionType.SingleValue);
+            var selectInconclusive = command.Option("-s|--select-inconclusive", "Inconculsive terms have to be selected manually", CommandOptionType.NoValue);
 
             command.OnExecute(() =>
             {
-                command.GetRequiredService<UpdateTranslationCacheCommand>().Run(from.ParsedValue, to.ParsedValue);
+                command.GetRequiredService<UpdateTranslationCacheCommand>().Run(from.ParsedValue, to.ParsedValue, selectInconclusive.HasValue());
                 return 0;
             });
         }
@@ -31,9 +32,9 @@ namespace Santolibre.Map.Search.CacheUtility.Commands
             _logger = logger;
         }
 
-        public void Run(Language from, Language to)
+        public void Run(Language from, Language to, bool selectInconclusive)
         {
-            _maintenanceService.UpdateTranslationCache(from, to);
+            _maintenanceService.UpdateTranslationCache(from, to, selectInconclusive);
         }
     }
 }

@@ -146,7 +146,7 @@ namespace Santolibre.Map.Search.Lib.Services
             }
             if (language.HasFlag(Language.DE))
             {
-                pointOfInterest.TagKeyValueSearch["de"] = _translationService.GetTranslation(Language.EN, Language.DE, tagKeyValueSearchEnglish).Select(x => x.Destination).ToList();
+                pointOfInterest.TagKeyValueSearch["de"] = _translationService.GetTranslation(Language.EN, Language.DE, tagKeyValueSearchEnglish, false).Select(x => x.TranslatedTerm).ToList();
             }
 
             _logger.LogTrace($"Filtered tags, Id={pointOfInterest.Id}, FilteredTagKeyValues={string.Join(", ", pointOfInterest.TagKeyValueSearch["en"])}");
@@ -234,19 +234,19 @@ namespace Santolibre.Map.Search.Lib.Services
             _logger.LogInformation($"{termDocumentCounts.Count(x => x.Value >= 10)} terms that have 10 or more points of interest, {termDocumentCounts.Where(x => x.Value >= 10).Sum(x => x.Value)} points of interest in total");
         }
 
-        public void UpdateTranslationCache(Language from, Language to)
+        public void UpdateTranslationCache(Language from, Language to, bool selectInconclusive)
         {
             var translationCache = new TranslationCache()
             {
-                Id = "TagAndValues"
+                Id = "TagKeysAndValues"
             };
 
             var terms = _documentService.RunOperation(new GetTermsOperation("PointOfInterest/ByTagsEnglish", "TagKeyValueSearch", null));
             for (var i = 0; i < terms.Length; i += 10)
             {
-                _translationService.GetTranslation(from, to, terms.Skip(i).Take(10).ToList()).ForEach(x =>
+                _translationService.GetTranslation(from, to, terms.Skip(i).Take(10).ToList(), selectInconclusive).ForEach(x =>
                 {
-                    translationCache.Terms.Add(x.Source, new Translations() { GermanTerm = x.Destination });
+                    translationCache.Terms.Add(x.Term, new Translations() { GermanTerm = x.TranslatedTerm });
                 });
             }
 

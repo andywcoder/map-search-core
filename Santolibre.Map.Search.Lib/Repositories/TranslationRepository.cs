@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Santolibre.Map.Search.Lib.Models;
 using System;
@@ -13,14 +14,18 @@ namespace Santolibre.Map.Search.Lib.Repositories
     public class TranslationRepository : ITranslationRepository
     {
         private readonly IConfiguration _configuration;
+        private readonly ILogger<TranslationRepository> _logger;
 
-        public TranslationRepository(IConfiguration configuration)
+        public TranslationRepository(IConfiguration configuration, ILogger<TranslationRepository> logger)
         {
             _configuration = configuration;
+            _logger = logger;
         }
 
         public async Task<TranslationResult[]> GetTranslationAsync(Language from, Language to, IEnumerable<string> terms)
         {
+            _logger.LogTrace($"Calling translation API for terms {string.Join(",", terms)} from {from} to {to}");
+
             using (var client = new HttpClient())
             {
                 using (var request = new HttpRequestMessage())
