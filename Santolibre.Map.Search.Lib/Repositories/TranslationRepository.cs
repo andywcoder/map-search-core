@@ -32,7 +32,7 @@ namespace Santolibre.Map.Search.Lib.Repositories
                 {
                     var requestBody = JsonConvert.SerializeObject(terms.Select(x => new { Text = x }));
                     request.Method = HttpMethod.Post;
-                    request.RequestUri = new Uri($"https://api.cognitive.microsofttranslator.com/dictionary/lookup?api-version=3.0&from={from.ToString().ToLower()}&to={to.ToString().ToLower()}");
+                    request.RequestUri = new Uri($"https://api.cognitive.microsofttranslator.com/dictionary/lookup?api-version=3.0&from={from.ToString().ToLower()}&to={to.ToString().ToLower()}&category=59a38da4-6c6d-4a97-af4b-051a33e1fe7a-GEOGRAP");
                     request.Content = new StringContent(requestBody, Encoding.UTF8, "application/json");
                     request.Headers.Add("Ocp-Apim-Subscription-Key", _configuration.GetValue<string>("AppSettings:AzureTranslatorSubscriptionKey"));
 

@@ -2,7 +2,7 @@
   "profiles": {
     "Santolibre.Map.Search.CacheUtility": {
       "commandName": "Project",
-      "commandLineArgs": "update-translation-cache --from=EN --to=DE --select-inconclusive"
+      "commandLineArgs": "update-translation-cache --from=EN --to=DE --mapping-file=Translation.csv"
     }
   }
 }
