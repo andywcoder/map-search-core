@@ -1,20 +1,20 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Santolibre.Map.Search.Geocoding.MapQuest;
+using Santolibre.Map.Search.Geocoding.OpenCage;
 
 namespace Santolibre.Map.Search.IntegrationTest
 {
     [TestClass]
-    public class MapQuestGeocodingServiceTest
+    public class OpenCageGeocodingServiceTest
     {
         private void Search(string locationQuery, bool isValid)
         {
             // Arrange
             var configuration = new Mock<IConfiguration>();
-            configuration.SetupKeyValuePair("AppSettings:MapQuestSearchApiKey", "Fmjtd%7Cluur29u72q%2C7l%3Do5-90rwq0");
+            configuration.SetupKeyValuePair("AppSettings:OpenCageApiKey", "d5699146fecc4c81a591432f03ba300b");
 
-            var mapQuestSearchService = new MapQuestGeocodingService(configuration.Object);
+            var mapQuestSearchService = new OpenCageGeocodingService(configuration.Object);
 
             // Act
             var location = mapQuestSearchService.Search(locationQuery);

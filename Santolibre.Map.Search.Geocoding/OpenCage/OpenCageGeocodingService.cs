@@ -26,7 +26,6 @@ namespace Santolibre.Map.Search.Geocoding.OpenCage
                 ZipCode = foundLocation.Components.Postcode,
                 GeoCoordinates = foundLocation.Geometry,
                 Radius = foundLocation.GetRadius(),
-                GeocodeQuality = null
             };
 
             return geocodingResult;
